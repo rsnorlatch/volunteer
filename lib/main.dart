@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme/app_theme.dart';
+import 'pages/auth/login_page.dart';
+
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(const BloodConnectApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class BloodConnectApp extends StatelessWidget {
+  const BloodConnectApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Volunteer BloodConnect',
+      theme: AppTheme.lightTheme,
+      home: const LoginPage(),
     );
   }
 }
