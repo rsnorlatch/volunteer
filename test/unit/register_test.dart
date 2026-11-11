@@ -1,15 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:volunteer/adapter/authenticator/fake_authenticator.dart';
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/services/auth_service.dart';
-import 'package:volunteer/statuses/RegisterStatus.dart';
+import 'package:volunteer/statuses/register_status.dart';
 
 void main() {
   late AuthService service;
   late FakeProfileRepository profiles;
+  late FakeAuthenticator auth;
 
   setUp(() {
     profiles = FakeProfileRepository();
-    service = AuthService(profiles);
+    auth = FakeAuthenticator(profiles);
+    service = AuthService(profiles, auth);
   });
 
   test(
