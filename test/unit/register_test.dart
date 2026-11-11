@@ -1,62 +1,93 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:volunteer/adapter/authenticator/fake_authenticator.dart';
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
+import 'package:volunteer/adapter/session_manager/fake_authenticator.dart';
+import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
+import 'package:volunteer/dtos/register_request_dto.dart';
+import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/auth_service.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
 void main() {
   late AuthService service;
   late FakeProfileRepository profiles;
-  late FakeSessionManager auth;
+  late FakeSessionManager session;
+  late FakeUserRepository users;
 
   setUp(() {
+    users = FakeUserRepository();
     profiles = FakeProfileRepository();
-    auth = FakeSessionManager(profiles);
-    service = AuthService(profiles, auth);
+    session = FakeSessionManager(profiles);
+    service = AuthService(profiles, session, users);
   });
 
   test(
     "when no credential is provided, should not create an account",
     () async {
-      final status = await service.registerAsync("", "", "");
+      final status = await service.registerAsync(
+        RegisterRequestDto("", "", "", "", Role.donor),
+      );
 
       expect(status, Registerstatus.emptyCredential);
       expect(await profiles.getAllAsync(), isEmpty);
+      expect(users.users, isEmpty);
     },
   );
 
   test("when password do not match, should not create an account", () async {
     final status = await service.registerAsync(
-      "achilles",
-      "password",
-      "notpassword",
+      RegisterRequestDto(
+        "achilles",
+        "achilles@gmail.com",
+        "password",
+        "notpassword",
+        Role.donor,
+      ),
     );
 
     expect(status, Registerstatus.passwordDoNotMatch);
     expect(await profiles.getAllAsync(), isEmpty);
+    expect(users.users, isEmpty);
   });
 
   test("when password does match, should create account", () async {
     final status = await service.registerAsync(
-      "tortoise",
-      "mypassword",
-      "mypassword",
+      RegisterRequestDto(
+        "tortoise",
+        "achilles@gmail.com",
+        "password",
+        "password",
+        Role.donor,
+      ),
     );
 
     expect(status, Registerstatus.success);
     expect(await profiles.getAllAsync(), isNotEmpty);
+    expect(users.users, isNotEmpty);
   });
 
   test("when username is already taken, should not create account", () async {
-    await service.registerAsync("achilles", "password", "password");
+    await service.registerAsync(
+      RegisterRequestDto(
+        "achilles",
+        "achilles@gmail.com",
+        "password",
+        "password",
+        Role.donor,
+      ),
+    );
 
     final status = await service.registerAsync(
-      "achilles",
-      "password",
-      "password",
+      RegisterRequestDto(
+        "achilles",
+        "achilles@gmail.com",
+        "password",
+        "password",
+        Role.donor,
+      ),
     );
 
     expect(status, Registerstatus.usernameTaken);
     expect((await profiles.getAllAsync()).length, 1);
+    expect(users.users.length, 1);
   });
 }

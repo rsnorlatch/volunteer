@@ -1,0 +1,1 @@
+enum Role { donor, organizer }
