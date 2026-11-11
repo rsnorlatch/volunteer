@@ -29,8 +29,13 @@ class AuthService {
       return Registerstatus.usernameTaken;
     }
 
-    await _profiles.insertAsync(Profile(dto.username, dto.email, dto.role));
-    await _user.insertAsync(User(dto.username, dto.email, dto.password));
+    final insertedUser = User(dto.username, dto.email, dto.password);
+
+    await _user.insertAsync(insertedUser);
+
+    await _profiles.insertAsync(
+      Profile(dto.username, dto.email, dto.role).withUserId(insertedUser.id),
+    );
 
     return Registerstatus.success;
   }

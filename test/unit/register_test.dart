@@ -90,4 +90,24 @@ void main() {
     expect((await profiles.getAllAsync()).length, 1);
     expect(users.users.length, 1);
   });
+
+  test(
+    "when registering user a valid credential, profile should reference a user",
+    () async {
+      await service.registerAsync(
+        RegisterRequestDto(
+          "achilles",
+          "achilles@gmail.com",
+          "password",
+          "password",
+          Role.donor,
+        ),
+      );
+
+      final profile = await profiles.getByUsernameAsync("achilles");
+
+      expect(profile, isNotNull);
+      expect(profile!.userId, isNotNull);
+    },
+  );
 }
