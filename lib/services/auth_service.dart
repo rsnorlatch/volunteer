@@ -1,14 +1,14 @@
-import 'package:volunteer/adapter/authenticator/fake_authenticator.dart';
-import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
+import 'package:volunteer/adapter/authenticator/authenticator_interface.dart';
+import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/entities/profile.dart';
 import 'package:volunteer/statuses/login_status.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
 class AuthService {
-  new(this._profiles, this._auth);
+  new(this._profiles, this._session);
 
-  final FakeProfileRepository _profiles;
-  final FakeSessionManager _auth;
+  final ProfileRepositoryInterface _profiles;
+  final SessionManagerInterface _session;
 
   Future<Registerstatus> registerAsync(
     String username,
@@ -39,7 +39,11 @@ class AuthService {
       return LoginStatus.noCredentialProvided;
     }
 
-    if (await _auth.authenticateAsync(username, password) == false) {
+    final correctCredential = await _session.validateAndSetCurrentUserAsync(
+      username,
+      password,
+    );
+    if (!correctCredential) {
       return LoginStatus.incorrectCredential;
     }
 

@@ -7,11 +7,11 @@ import 'package:volunteer/statuses/register_status.dart';
 void main() {
   late AuthService service;
   late FakeProfileRepository profiles;
-  late FakeAuthenticator auth;
+  late FakeSessionManager auth;
 
   setUp(() {
     profiles = FakeProfileRepository();
-    auth = FakeAuthenticator(profiles);
+    auth = FakeSessionManager(profiles);
     service = AuthService(profiles, auth);
   });
 

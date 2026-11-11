@@ -2,7 +2,7 @@ import 'package:volunteer/adapter/authenticator/authenticator_interface.dart';
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/entities/profile.dart';
 
-class FakeAuthenticator implements AuthenticatorInterface {
+class FakeSessionManager implements SessionManagerInterface {
   new(this._profiles);
 
   final FakeProfileRepository _profiles;
@@ -13,7 +13,10 @@ class FakeAuthenticator implements AuthenticatorInterface {
   Profile? get currentProfile => _currentProfile;
 
   @override
-  Future<bool> authenticateAsync(String username, String password) async {
+  Future<bool> validateAndSetCurrentUserAsync(
+    String username,
+    String password,
+  ) async {
     if (password != correctPassword) return false;
 
     _currentProfile = await _profiles.getByUsernameAsync(username);
