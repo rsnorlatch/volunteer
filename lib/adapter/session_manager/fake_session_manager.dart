@@ -1,29 +1,27 @@
-import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
-import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
 import 'package:volunteer/adapter/user_repository/user_repository_interface.dart';
 import 'package:volunteer/entities/profile.dart';
 
 class FakeSessionManager implements SessionManagerInterface {
-  FakeSessionManager(this._profiles, this._users);
+  FakeSessionManager(this._profiles, this.correctPassword);
 
   final ProfileRepositoryInterface _profiles;
-  final UserRepositoryInterface _users;
+  final String correctPassword;
 
   Profile? _currentProfile;
   Profile? get currentProfile => _currentProfile;
 
   @override
   Future<bool> validateAndSetCurrentUserAsync(
-    String username,
+    String email,
     String password,
   ) async {
-    final user = _users.findByIdentifierAndPassword(username, password);
-    if (user == null) return false;
+    if (password != correctPassword) return false;
 
-    _currentProfile = await _profiles.getByUsernameAsync(user.username);
-    return _currentProfile != null;
+    _currentProfile = await _profiles.getByEmailAsync(email);
+
+    return true;
   }
 
   @override

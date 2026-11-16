@@ -7,11 +7,10 @@ import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dar
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/adapter/session_manager/fake_session_manager.dart';
 import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
-import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/auth_service.dart';
-import 'package:volunteer/services/auth_service_binding.dart';
+import 'package:volunteer/services/fake_auth_service_binding.dart';
 import 'package:volunteer/statuses/login_status.dart';
 
 void main() {
@@ -49,7 +48,7 @@ void main() {
     );
 
     final status = await service.loginAsync(
-      'achilles',
+      'achilles@gmail.com',
       'incorrectPassword',
     );
 
@@ -68,11 +67,11 @@ void main() {
     );
 
     final status = await service.loginAsync(
-      'achilles',
+      'achilles@gmail.com',
       'Password123',
     );
 
-    final currentProfile = await profiles.getByUsernameAsync('achilles');
+    final currentProfile = await profiles.getByEmailAsync('achilles@gmail.com');
 
     expect(status, LoginStatus.success);
     expect(await session.getCurrentProfileAsync(), currentProfile);
@@ -92,7 +91,7 @@ void main() {
     );
 
     await service.loginAsync(
-      'achilles',
+      'achilles@gmail.com',
       'Password123',
     );
 

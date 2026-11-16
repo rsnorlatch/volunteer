@@ -52,6 +52,7 @@ class AuthService {
       username.trim(),
       password,
     );
+
     return correctCredential
         ? LoginStatus.success
         : LoginStatus.incorrectCredential;

@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 class BloodActivity {
   final String id;
   final String title;
@@ -47,5 +49,29 @@ class BloodActivity {
       quota: quota ?? this.quota,
       registered: registered ?? this.registered,
     );
+  }
+
+  static BloodActivity create({
+    String? id,
+    required String title,
+    required String location,
+    required String date,
+    required String time,
+    required String organizer,
+    required String bloodGroups,
+    required String description,
+    required int quota,
+  }) {
+    return BloodActivity(
+        id: id ?? Uuid().v4(),
+        title: title,
+        location: location,
+        date: date,
+        time: time,
+        organizer: organizer,
+        bloodGroups: bloodGroups,
+        description: description,
+        quota: quota,
+        registered: 0);
   }
 }

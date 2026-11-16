@@ -9,7 +9,7 @@ import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/auth_service.dart';
-import 'package:volunteer/services/auth_service_binding.dart';
+import 'package:volunteer/services/fake_auth_service_binding.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
 void main() {
