@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/session_manager/fake_authenticator.dart';
 import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
@@ -15,45 +16,54 @@ void main() {
 
   setUp(() {
     profiles = FakeProfileRepository();
-    session = FakeSessionManager(profiles);
     users = FakeUserRepository();
+
+    session = FakeSessionManager(profiles, users);
     service = AuthService(profiles, session, users);
   });
 
-  test("when no credential provided, should not logged the user in", () async {
-    final status = await service.loginAsync("", "");
+  test('when no credential provided, should not log the user in', () async {
+    final status = await service.loginAsync('', '');
 
     expect(status, LoginStatus.noCredentialProvided);
   });
 
-  test("when password is incorrect, should not logged the user in", () async {
+  test('when password is incorrect, should not log the user in', () async {
     await service.registerAsync(
       RegisterRequestDto(
-        "achilles",
-        "achilles@gmail.com",
-        "Password123",
-        "Password123",
+        'achilles',
+        'achilles@gmail.com',
+        'Password123',
+        'Password123',
         Role.donor,
       ),
     );
-    final status = await service.loginAsync("achilles", "incorrectPassword");
+
+    final status = await service.loginAsync(
+      'achilles',
+      'incorrectPassword',
+    );
 
     expect(status, LoginStatus.incorrectCredential);
   });
 
-  test("when password is correct, should logged the user in", () async {
+  test('when password is correct, should log the user in', () async {
     await service.registerAsync(
       RegisterRequestDto(
-        "achilles",
-        "achilles@gmail.com",
-        "Password123",
-        "Password123",
+        'achilles',
+        'achilles@gmail.com',
+        'Password123',
+        'Password123',
         Role.donor,
       ),
     );
-    final status = await service.loginAsync("tortoise", "Password123");
 
-    final currentProfile = await profiles.getByUsernameAsync("tortoise");
+    final status = await service.loginAsync(
+      'achilles',
+      'Password123',
+    );
+
+    final currentProfile = await profiles.getByUsernameAsync('achilles');
 
     expect(status, LoginStatus.success);
     expect(session.currentProfile, currentProfile);
