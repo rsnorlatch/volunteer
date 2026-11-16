@@ -8,14 +8,17 @@ import 'package:volunteer/statuses/login_status.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
 class AuthService {
-  new(this._profiles, this._session, this._user);
+  AuthService(this._profiles, this._session, this._user);
 
   final ProfileRepositoryInterface _profiles;
   final SessionManagerInterface _session;
   final UserRepositoryInterface _user;
 
   Future<Registerstatus> registerAsync(RegisterRequestDto dto) async {
-    if (dto.username == "" || dto.password == "" || dto.confirmPassword == "") {
+    if (dto.username.trim().isEmpty ||
+        dto.email.trim().isEmpty ||
+        dto.password.isEmpty ||
+        dto.confirmPassword.isEmpty) {
       return Registerstatus.emptyCredential;
     }
 
@@ -23,36 +26,29 @@ class AuthService {
       return Registerstatus.passwordDoNotMatch;
     }
 
-    final profile = await _profiles.getByUsernameAsync(dto.username);
+    final existingProfile = await _profiles.getByUsernameAsync(dto.username.trim());
+    if (existingProfile != null) return Registerstatus.usernameTaken;
 
-    if (profile != null) {
-      return Registerstatus.usernameTaken;
-    }
-
-    final insertedUser = User(dto.username, dto.email, dto.password);
-
+    final insertedUser = User(dto.username.trim(), dto.email.trim(), dto.password);
     await _user.insertAsync(insertedUser);
-
     await _profiles.insertAsync(
-      Profile(dto.username, dto.email, dto.role).withUserId(insertedUser.id),
+      Profile(dto.username.trim(), dto.email.trim(), dto.role)
+          .withUserId(insertedUser.id),
     );
 
     return Registerstatus.success;
   }
 
   Future<LoginStatus> loginAsync(String username, String password) async {
-    if (username == "" || password == "") {
+    if (username.trim().isEmpty || password.isEmpty) {
       return LoginStatus.noCredentialProvided;
     }
 
     final correctCredential = await _session.validateAndSetCurrentUserAsync(
-      username,
-      password,
+      username.trim(), password,
     );
-    if (!correctCredential) {
-      return LoginStatus.incorrectCredential;
-    }
-
-    return LoginStatus.success;
+    return correctCredential
+        ? LoginStatus.success
+        : LoginStatus.incorrectCredential;
   }
 }

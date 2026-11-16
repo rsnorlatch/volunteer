@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../services/auth_service.dart';
+import '../../statuses/login_status.dart';
 
 import '../../shared/constants/app_colors.dart';
 import 'signup_page.dart';
@@ -31,17 +34,20 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-
-    // Simulasi proses login. Belum terhubung ke Supabase.
-    await Future.delayed(const Duration(seconds: 1));
-
+    final status = await Get.find<AuthService>().loginAsync(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
     if (!mounted) return;
-
     setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login berhasil disimulasikan.')),
-    );
+    final message = switch (status) {
+      LoginStatus.success => 'Login berhasil. Mode frontend/dummy aktif.',
+      LoginStatus.noCredentialProvided => 'Email dan password wajib diisi.',
+      LoginStatus.incorrectCredential => 'Akun belum terdaftar atau password salah. Daftar terlebih dahulu.',
+    };
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
   }
 
   @override

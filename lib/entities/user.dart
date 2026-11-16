@@ -1,16 +1,10 @@
 import 'package:uuid/uuid.dart';
 
 class User {
-  new(this.username, this.email, this.password);
+  User(this.username, this.email, this.password) : id = const Uuid().v4();
 
-  Uuid id = Uuid();
+  String id;
   String username;
   String email;
-  String password;
-
-  User withId(Uuid id) {
-    this.id = id;
-
-    return this;
-  }
+  String password; // Dummy lokal untuk tugas frontend, bukan penyimpanan produksi.
 }

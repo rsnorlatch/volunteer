@@ -1,7 +1,6 @@
 name: volunteer
 description: Volunteer - BloodDonor application.
 publish_to: "none"
-
 version: 1.0.0+1
 
 environment:
@@ -10,33 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
-
-  # State management dan routing
   get: ^4.7.2
-
-  # Backend
-  supabase_flutter: ^2.9.1
-
-  # Format tanggal
   intl: ^0.20.2
-
-  # Pemilihan gambar
-  image_picker: ^1.1.2
-
-  # Ikon tambahan
-  flutter_svg: ^2.0.17
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
-
-  assets:
-    - assets/images/
-    - assets/icons/
