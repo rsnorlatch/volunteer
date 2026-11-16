@@ -1,5 +1,5 @@
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
-import 'package:volunteer/adapter/session_manager/authenticator_interface.dart';
+import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
 import 'package:volunteer/adapter/user_repository/user_repository_interface.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/profile.dart';
@@ -26,11 +26,15 @@ class AuthService {
       return Registerstatus.passwordDoNotMatch;
     }
 
-    final existingProfile = await _profiles.getByUsernameAsync(dto.username.trim());
+    final existingProfile =
+        await _profiles.getByUsernameAsync(dto.username.trim());
+
     if (existingProfile != null) return Registerstatus.usernameTaken;
 
-    final insertedUser = User(dto.username.trim(), dto.email.trim(), dto.password);
+    final insertedUser =
+        User(dto.username.trim(), dto.email.trim(), dto.password);
     await _user.insertAsync(insertedUser);
+
     await _profiles.insertAsync(
       Profile(dto.username.trim(), dto.email.trim(), dto.role)
           .withUserId(insertedUser.id),
@@ -45,10 +49,15 @@ class AuthService {
     }
 
     final correctCredential = await _session.validateAndSetCurrentUserAsync(
-      username.trim(), password,
+      username.trim(),
+      password,
     );
     return correctCredential
         ? LoginStatus.success
         : LoginStatus.incorrectCredential;
+  }
+
+  Future<void> logoutAsync() async {
+    await _session.destroyAsync();
   }
 }
