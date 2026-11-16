@@ -2,7 +2,7 @@ import 'package:volunteer/adapter/profile_repository/profile_repository_interfac
 import 'package:volunteer/entities/profile.dart';
 
 class FakeProfileRepository implements ProfileRepositoryInterface {
-  List<Profile> profiles = [];
+  final List<Profile> profiles = [];
 
   @override
   Future<void> insertAsync(Profile profile) async {
@@ -10,14 +10,15 @@ class FakeProfileRepository implements ProfileRepositoryInterface {
   }
 
   @override
-  Future<List<Profile>> getAllAsync() async {
-    return profiles;
-  }
+  Future<List<Profile>> getAllAsync() async => List.unmodifiable(profiles);
 
   @override
   Future<Profile?> getByUsernameAsync(String username) async {
-    return profiles
-        .where((profile) => profile.username == username)
-        .firstOrNull;
+    for (final profile in profiles) {
+      if (profile.username.toLowerCase() == username.toLowerCase()) {
+        return profile;
+      }
+    }
+    return null;
   }
 }

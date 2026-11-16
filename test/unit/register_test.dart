@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/session_manager/fake_authenticator.dart';
 import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
@@ -16,30 +17,29 @@ void main() {
   setUp(() {
     users = FakeUserRepository();
     profiles = FakeProfileRepository();
-    session = FakeSessionManager(profiles);
+
+    session = FakeSessionManager(profiles, users);
     service = AuthService(profiles, session, users);
   });
 
-  test(
-    "when no credential is provided, should not create an account",
-    () async {
-      final status = await service.registerAsync(
-        RegisterRequestDto("", "", "", "", Role.donor),
-      );
+  test('when no credential is provided, should not create an account',
+      () async {
+    final status = await service.registerAsync(
+      RegisterRequestDto('', '', '', '', Role.donor),
+    );
 
-      expect(status, Registerstatus.emptyCredential);
-      expect(await profiles.getAllAsync(), isEmpty);
-      expect(users.users, isEmpty);
-    },
-  );
+    expect(status, Registerstatus.emptyCredential);
+    expect(await profiles.getAllAsync(), isEmpty);
+    expect(users.users, isEmpty);
+  });
 
-  test("when password do not match, should not create an account", () async {
+  test('when password does not match, should not create an account', () async {
     final status = await service.registerAsync(
       RegisterRequestDto(
-        "achilles",
-        "achilles@gmail.com",
-        "password",
-        "notpassword",
+        'achilles',
+        'achilles@gmail.com',
+        'password',
+        'notpassword',
         Role.donor,
       ),
     );
@@ -49,13 +49,13 @@ void main() {
     expect(users.users, isEmpty);
   });
 
-  test("when password does match, should create account", () async {
+  test('when password matches, should create an account', () async {
     final status = await service.registerAsync(
       RegisterRequestDto(
-        "tortoise",
-        "achilles@gmail.com",
-        "password",
-        "password",
+        'tortoise',
+        'tortoise@gmail.com',
+        'password',
+        'password',
         Role.donor,
       ),
     );
@@ -65,23 +65,24 @@ void main() {
     expect(users.users, isNotEmpty);
   });
 
-  test("when username is already taken, should not create account", () async {
+  test('when username is already taken, should not create an account',
+      () async {
     await service.registerAsync(
       RegisterRequestDto(
-        "achilles",
-        "achilles@gmail.com",
-        "password",
-        "password",
+        'achilles',
+        'achilles@gmail.com',
+        'password',
+        'password',
         Role.donor,
       ),
     );
 
     final status = await service.registerAsync(
       RegisterRequestDto(
-        "achilles",
-        "achilles@gmail.com",
-        "password",
-        "password",
+        'achilles',
+        'achilles@gmail.com',
+        'password',
+        'password',
         Role.donor,
       ),
     );
@@ -91,23 +92,21 @@ void main() {
     expect(users.users.length, 1);
   });
 
-  test(
-    "when registering user a valid credential, profile should reference a user",
-    () async {
-      await service.registerAsync(
-        RegisterRequestDto(
-          "achilles",
-          "achilles@gmail.com",
-          "password",
-          "password",
-          Role.donor,
-        ),
-      );
+  test('when registering a valid credential, profile should reference a user',
+      () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'achilles',
+        'achilles@gmail.com',
+        'password',
+        'password',
+        Role.donor,
+      ),
+    );
 
-      final profile = await profiles.getByUsernameAsync("achilles");
+    final profile = await profiles.getByUsernameAsync('achilles');
 
-      expect(profile, isNotNull);
-      expect(profile!.userId, isNotNull);
-    },
-  );
+    expect(profile, isNotNull);
+    expect(profile!.userId, isNotNull);
+  });
 }

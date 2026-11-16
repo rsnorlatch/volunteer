@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../shared/constants/app_colors.dart';
+import '/shared/constants/app_colors.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -8,20 +8,17 @@ class AppTheme {
       useMaterial3: true,
       fontFamily: 'Roboto',
       scaffoldBackgroundColor: AppColors.background,
-
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryColor,
         primary: AppColors.primaryColor,
         surface: AppColors.surface,
       ),
-
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryColor,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: false,
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,

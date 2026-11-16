@@ -1,7 +1,7 @@
 import 'package:volunteer/entities/role.dart';
 
 class RegisterRequestDto {
-  new(
+  RegisterRequestDto(
     this.username,
     this.email,
     this.password,
@@ -9,9 +9,9 @@ class RegisterRequestDto {
     this.role,
   );
 
-  String username;
-  String email;
-  String password;
-  String confirmPassword;
-  Role role;
+  final String username;
+  final String email;
+  final String password;
+  final String confirmPassword;
+  final Role role;
 }

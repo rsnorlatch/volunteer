@@ -29,7 +29,7 @@ class AuthHeader extends StatelessWidget {
         const SizedBox(height: 24),
 
         const Text(
-          'Volunteer BloodConnect',
+          'Volunteer - BloodDonor',
           style: TextStyle(
             color: AppColors.primaryColor,
             fontSize: 16,

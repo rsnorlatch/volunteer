@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../dtos/register_request_dto.dart';
+import '../../entities/role.dart';
+import '../../services/auth_service.dart';
+import '../../statuses/register_status.dart';
 
 import '../../shared/constants/app_colors.dart';
 import 'widgets/auth_header.dart';
@@ -39,17 +44,26 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-
-    // Simulasi pendaftaran. Belum terhubung ke Supabase.
-    await Future.delayed(const Duration(seconds: 1));
-
+    final dto = RegisterRequestDto(
+      _usernameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text,
+      _confirmPasswordController.text,
+      _selectedRole == 'organizer' ? Role.organizer : Role.donor,
+    );
+    final status = await Get.find<AuthService>().registerAsync(dto);
     if (!mounted) return;
-
     setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Pendaftaran berhasil disimulasikan.')),
-    );
+    final message = switch (status) {
+      Registerstatus.success => 'Akun berhasil dibuat. Silakan masuk.',
+      Registerstatus.emptyCredential => 'Semua kolom wajib diisi.',
+      Registerstatus.passwordDoNotMatch => 'Konfirmasi password tidak cocok.',
+      Registerstatus.usernameTaken => 'Username sudah digunakan.',
+    };
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    if (status == Registerstatus.success && mounted) Navigator.pop(context);
+
   }
 
   @override
