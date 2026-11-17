@@ -9,6 +9,7 @@ import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
 import 'package:volunteer/shared/widgets/primary_button.dart';
 import 'package:volunteer/shared/widgets/sub_page_scaffold.dart';
+import 'package:volunteer/data/models/registration.dart';
 
 class RegistrationStatusPage extends StatelessWidget {
   const RegistrationStatusPage({super.key});
