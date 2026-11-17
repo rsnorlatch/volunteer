@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../services/auth_service.dart';
-import '../../statuses/login_status.dart';
 
-import '../../shared/constants/app_colors.dart';
-import 'signup_page.dart';
-import 'widgets/auth_header.dart';
-import 'widgets/auth_text_field.dart';
-import 'widgets/auth_button.dart';
+import 'package:volunteer/controllers/profile_controller.dart';
+import 'package:volunteer/core/routes/app_routes.dart';
+import 'package:volunteer/core/utils/validators.dart';
+import 'package:volunteer/entities/role.dart';
+import 'package:volunteer/pages/auth/auth_controller.dart';
+import 'package:volunteer/shared/constants/app_colors.dart';
+import 'package:volunteer/shared/widgets/app_snackbar.dart';
+import 'package:volunteer/shared/widgets/custom_text_field.dart';
+import 'package:volunteer/shared/widgets/primary_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,45 +20,43 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool _isLoading = false;
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _auth = Get.find<AuthController>();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _email.dispose();
+    _password.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+    final error = await _auth.login(_email.text, _password.text);
+    if (error != null) {
+      showAppSnack(error, error: true);
+      return;
+    }
+    final isOrganizer =
+        Get.find<ProfileController>().role.value == Role.organizer;
+    Get.offAllNamed(
+        isOrganizer ? AppRoutes.organizerDashboard : AppRoutes.home);
+  }
 
-    setState(() => _isLoading = true);
-    final status = await Get.find<AuthService>().loginAsync(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    final message = switch (status) {
-      LoginStatus.success => 'Login berhasil. Mode frontend/dummy aktif.',
-      LoginStatus.noCredentialProvided => 'Email dan password wajib diisi.',
-      LoginStatus.incorrectCredential => 'Akun belum terdaftar atau password salah. Daftar terlebih dahulu.',
-    };
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-
+  void _continueAsGuest() {
+    Get.find<ProfileController>().setGuest();
+    Get.offAllNamed(AppRoutes.home);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          child: Align(
+            alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
               child: Form(
@@ -64,125 +64,112 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const AuthHeader(
-                      title: 'Selamat Datang!',
-                      subtitle:
-                          'Masuk untuk terhubung dengan komunitas donor darah.',
+                    const Text(
+                      'Volunteer-BloodDonor',
+                      style: TextStyle(
+                        color: AppColors.primaryColor,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-
                     const SizedBox(height: 36),
-
-                    AuthTextField(
-                      label: 'Email',
-                      hint: 'Masukkan email',
-                      prefixIcon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      controller: _emailController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Email wajib diisi';
-                        }
-
-                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(value)) {
-                          return 'Format email tidak valid';
-                        }
-
-                        return null;
-                      },
+                    const Text(
+                      'Selamat datang kembali',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    AuthTextField(
-                      label: 'Password',
-                      hint: 'Masukkan password',
-                      prefixIcon: Icons.lock_outline,
-                      isPassword: true,
-                      controller: _passwordController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Password wajib diisi';
-                        }
-
-                        if (value.length < 6) {
-                          return 'Password minimal 6 karakter';
-                        }
-
-                        return null;
-                      },
-                    ),
-
                     const SizedBox(height: 8),
-
+                    const Text(
+                      'Masuk untuk terhubung dan berbagi kehidupan.',
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 13),
+                    ),
+                    const SizedBox(height: 32),
+                    CustomTextField(
+                      label: 'Email',
+                      hint: 'nama@email.com',
+                      controller: _email,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: Validators.email,
+                    ),
+                    const SizedBox(height: 16),
+                    CustomTextField(
+                      label: 'Kata sandi',
+                      hint: 'Masukkan kata sandi',
+                      controller: _password,
+                      obscureText: true,
+                      validator: (v) => Validators.required(v, 'Kata sandi'),
+                    ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Fitur lupa password belum tersedia.',
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: () => showAppSnack(
+                            'Fitur lupa kata sandi belum tersedia.'),
                         child: const Text(
-                          'Lupa Password?',
+                          'Lupa kata sandi?',
                           style: TextStyle(
                             color: AppColors.primaryColor,
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 20),
-
-                    AuthButton(
-                      text: 'Masuk',
-                      isLoading: _isLoading,
-                      onPressed: _login,
+                    const SizedBox(height: 8),
+                    Obx(() => PrimaryButton(
+                          text: 'Masuk',
+                          isLoading: _auth.isLoading.value,
+                          onPressed: _login,
+                        )),
+                    const SizedBox(height: 16),
+                    const Center(
+                      child: Text('atau',
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 12)),
                     ),
-
-                    const SizedBox(height: 24),
-
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: _continueAsGuest,
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: AppColors.surface,
+                          foregroundColor: AppColors.textPrimary,
+                          side: const BorderSide(color: AppColors.border),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Lanjutkan sebagai pendonor',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Belum punya akun?',
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
+                        const Text('Belum punya akun?',
+                            style: TextStyle(
+                                color: AppColors.primaryColor, fontSize: 13)),
                         TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const SignUpPage(),
-                              ),
-                            );
-                          },
+                          onPressed: () => Get.toNamed(AppRoutes.signup),
                           child: const Text(
-                            'Daftar Sekarang',
+                            'Daftar',
                             style: TextStyle(
                               color: AppColors.primaryColor,
+                              fontSize: 13,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const Center(
-                      child: Text(
-                        'Connecting donors, saving lives.',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
                     ),
                   ],
                 ),

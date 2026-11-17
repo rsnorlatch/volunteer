@@ -1,90 +1,73 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/constants/app_colors.dart';
+import 'package:volunteer/entities/role.dart';
+import 'package:volunteer/shared/constants/app_colors.dart';
 
 class RoleSelector extends StatelessWidget {
-  final String selectedRole;
-  final ValueChanged<String> onChanged;
+  const RoleSelector(
+      {super.key, required this.selected, required this.onChanged});
 
-  const RoleSelector({
-    super.key,
-    required this.selectedRole,
-    required this.onChanged,
-  });
+  final Role selected;
+  final ValueChanged<Role> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: _buildRoleCard(
-            role: 'donor',
-            title: 'Pendonor',
-            subtitle: 'Saya ingin mendonorkan darah',
-            icon: Icons.volunteer_activism_outlined,
-          ),
+          child: _card(
+              Role.donor, Icons.favorite, 'Pendonor', 'Saya ingin mendonor'),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildRoleCard(
-            role: 'organizer',
-            title: 'Penyelenggara',
-            subtitle: 'Saya mengadakan kegiatan donor',
-            icon: Icons.local_hospital_outlined,
-          ),
+          child:
+              _card(Role.organizer, Icons.add, 'Organizer', 'Kelola kegiatan'),
         ),
       ],
     );
   }
 
-  Widget _buildRoleCard({
-    required String role,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-  }) {
-    final isSelected = selectedRole == role;
-
+  Widget _card(Role role, IconData icon, String title, String subtitle) {
+    final isSelected = selected == role;
     return InkWell(
       onTap: () => onChanged(role),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryLight : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.primaryLight : AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.primaryColor : AppColors.border,
-            width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? AppColors.primaryColor
-                  : AppColors.textSecondary,
-              size: 26,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon,
+                    size: 16,
+                    color: isSelected
+                        ? AppColors.primaryColor
+                        : AppColors.textPrimary),
+                const SizedBox(width: 6),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: isSelected
+                        ? AppColors.primaryColor
+                        : AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              subtitle,
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-              ),
-            ),
+            const SizedBox(height: 6),
+            Text(subtitle,
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondary)),
           ],
         ),
       ),
