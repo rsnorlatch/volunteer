@@ -6,4 +6,6 @@ abstract interface class ProfileRepositoryInterface {
   Future<List<Profile>> getAllAsync();
 
   Future<Profile?> getByUsernameAsync(String username);
+
+  Future<Profile?> getByEmailAsync(String email);
 }

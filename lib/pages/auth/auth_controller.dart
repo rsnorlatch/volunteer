@@ -1,5 +1,4 @@
-
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../dtos/register_request_dto.dart';
@@ -11,6 +10,7 @@ import '../../statuses/register_status.dart';
 class AuthController extends GetxController {
   final AuthService authService = Get.find<AuthService>();
 
+  final loginEmailController = TextEditingController();
   final usernameController = TextEditingController();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -30,14 +30,14 @@ class AuthController extends GetxController {
   }
 
   Future<LoginStatus> login() async {
-    final usernameOrEmail = usernameController.text.trim();
+    final email = loginEmailController.text.trim();
     final password = passwordController.text;
 
     isLoading.value = true;
 
     try {
       return await authService.loginAsync(
-        usernameOrEmail,
+        email,
         password,
       );
     } finally {
@@ -65,6 +65,7 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
+    loginEmailController.dispose();
     usernameController.dispose();
     nameController.dispose();
     emailController.dispose();

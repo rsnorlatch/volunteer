@@ -1,25 +1,32 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get/get_common/get_reset.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
 
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
-import 'package:volunteer/adapter/session_manager/fake_authenticator.dart';
+import 'package:volunteer/adapter/session_manager/fake_session_manager.dart';
 import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/auth_service.dart';
+import 'package:volunteer/services/fake_auth_service_binding.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
 void main() {
   late AuthService service;
   late FakeProfileRepository profiles;
-  late FakeSessionManager session;
   late FakeUserRepository users;
 
   setUp(() {
-    users = FakeUserRepository();
-    profiles = FakeProfileRepository();
+    FakeAuthServiceBinding().dependencies();
 
-    session = FakeSessionManager(profiles, users);
-    service = AuthService(profiles, session, users);
+    service = Get.find<AuthService>();
+    profiles = Get.find<FakeProfileRepository>();
+    users = Get.find<FakeUserRepository>();
+  });
+
+  tearDown(() async {
+    Get.reset();
   });
 
   test('when no credential is provided, should not create an account',

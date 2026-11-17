@@ -6,5 +6,6 @@ class User {
   String id;
   String username;
   String email;
-  String password; // Dummy lokal untuk tugas frontend, bukan penyimpanan produksi.
+  String
+      password; // Dummy lokal untuk tugas frontend, bukan penyimpanan produksi.
 }

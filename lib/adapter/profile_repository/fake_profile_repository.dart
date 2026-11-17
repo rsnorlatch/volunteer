@@ -21,4 +21,14 @@ class FakeProfileRepository implements ProfileRepositoryInterface {
     }
     return null;
   }
+
+  @override
+  Future<Profile?> getByEmailAsync(String email) async {
+    for (final profile in profiles) {
+      if (profile.email.toLowerCase() == email.toLowerCase()) {
+        return profile;
+      }
+    }
+    return null;
+  }
 }
