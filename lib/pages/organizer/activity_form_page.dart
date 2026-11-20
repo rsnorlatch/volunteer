@@ -7,6 +7,7 @@ import 'package:volunteer/core/constants/app_constants.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/bloodtype.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -52,15 +53,18 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       if (a != null) {
         _title.text = a.title;
         _location.text = a.location;
-        _date = DateTime.tryParse(a.date);
-        final parts = a.time.split('-');
-        if (parts.length == 2) {
-          _start = Fmt.parseTime(parts[0]);
-          _end = Fmt.parseTime(parts[1]);
-        }
-        _groups.addAll(Fmt.acceptsAll(a.bloodGroups)
+        _date = a.startDateTime;
+        _start = TimeOfDay(
+          hour: a.startDateTime.hour,
+          minute: a.startDateTime.minute,
+        );
+        _end = TimeOfDay(
+          hour: a.endDateTime.hour,
+          minute: a.endDateTime.minute,
+        );
+        _groups.addAll(Fmt.acceptsAllBloodTypes(a.bloodGroups)
             ? AppConstants.bloodTypes
-            : Fmt.groups(a.bloodGroups));
+            : Fmt.bloodTypeLabels(a.bloodGroups));
       }
     }
   }
@@ -177,17 +181,32 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     if (!formOk || dateErr != null || timeErr != null || groupErr != null)
       return;
 
-    final groups = AppConstants.bloodTypes.where(_groups.contains).join(', ');
-    final date = Fmt.isoDate(_date!);
-    final time = '${Fmt.hhmm(_start!)} - ${Fmt.hhmm(_end!)}';
+    final bloodGroups = _groups
+        .map(BloodActivity.bloodTypeFromLabel)
+        .whereType<BloodType>()
+        .toList();
+    final start = DateTime(
+      _date!.year,
+      _date!.month,
+      _date!.day,
+      _start!.hour,
+      _start!.minute,
+    );
+    final end = DateTime(
+      _date!.year,
+      _date!.month,
+      _date!.day,
+      _end!.hour,
+      _end!.minute,
+    );
 
     if (widget.isEdit && _existing != null) {
       _ctrl.updateActivity(_existing!.copyWith(
         title: _title.text.trim(),
         location: _location.text.trim(),
-        date: date,
-        time: time,
-        bloodGroups: groups,
+        startDateTime: start,
+        endDateTime: end,
+        bloodGroups: bloodGroups,
       ));
       Get.back();
       showAppSnack('Kegiatan berhasil diperbarui.');
@@ -196,10 +215,10 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       _ctrl.addActivity(BloodActivity.create(
         title: _title.text.trim(),
         location: _location.text.trim(),
-        date: date,
-        time: time,
+        startDateTime: start,
+        endDateTime: end,
         organizer: _profile.name.value,
-        bloodGroups: groups,
+        bloodGroups: bloodGroups,
         description: '',
         quota: quota,
       ));

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart' show TimeOfDay;
 
+import 'package:volunteer/data/models/bloodtype.dart';
+
 class Fmt {
   Fmt._();
 
@@ -63,6 +65,9 @@ class Fmt {
     return '${_dayLong[d.weekday - 1]}, ${d.day} ${_monthLong[d.month - 1]} ${d.year}';
   }
 
+  static String longDateOf(DateTime d) =>
+      '${_dayLong[d.weekday - 1]}, ${d.day} ${_monthLong[d.month - 1]} ${d.year}';
+
   /// "09:00 - 13:00" -> "09.00–13.00"
   static String timeRange(String t) =>
       t.replaceAll(':', '.').replaceAll(' - ', '–');
@@ -94,6 +99,20 @@ class Fmt {
     if (acceptsAll(s)) return 'Semua';
     final g = groups(s);
     return g.isEmpty ? '-' : g.first;
+  }
+
+  static String timeRangeOf(DateTime start, DateTime end) =>
+      '${_two(start.hour)}:${_two(start.minute)}–${_two(end.hour)}:${_two(end.minute)}';
+
+  static List<String> bloodTypeLabels(List<BloodType> groups) =>
+      groups.map((g) => g.label).toList();
+
+  static bool acceptsAllBloodTypes(List<BloodType> groups) =>
+      groups.length >= 8;
+
+  static String badgeBloodTypes(List<BloodType> groups) {
+    if (acceptsAllBloodTypes(groups)) return 'Semua';
+    return groups.isEmpty ? '-' : groups.first.label;
   }
 
   static String distance(double km) =>

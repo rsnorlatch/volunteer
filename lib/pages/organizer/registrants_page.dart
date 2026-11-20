@@ -131,7 +131,7 @@ class _RegistrantsPageState extends State<RegistrantsPage> {
 
       return SubPageScaffold(
         title: 'Kelola pendaftar',
-        subtitle: '${a.title} • ${Fmt.shortDate(a.date)}',
+        subtitle: '${a.title} • ${Fmt.shortOf(a.startDateTime)}',
         children: [
           AppCard(
             padding: const EdgeInsets.all(16),

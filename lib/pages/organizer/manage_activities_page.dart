@@ -94,7 +94,7 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
                                       color: AppColors.textPrimary)),
                               const SizedBox(height: 6),
                               Text(
-                                  '${Fmt.shortDate(a.date)} • ${a.registered} pendaftar',
+                                  '${Fmt.shortOf(a.startDateTime)} • ${a.registered} pendaftar',
                                   style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary)),

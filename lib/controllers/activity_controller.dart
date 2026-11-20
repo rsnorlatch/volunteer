@@ -31,13 +31,12 @@ class ActivityController extends GetxController {
   // ---------- Donor ----------
 
   bool isActive(BloodActivity a) {
-    final d = DateTime.tryParse(a.date);
-    return d != null && !d.isBefore(_today());
+    return !a.startDateTime.isBefore(_today());
   }
 
   List<BloodActivity> get upcomingActivities {
     final list = activities.where(isActive).toList();
-    list.sort((a, b) => a.date.compareTo(b.date));
+    list.sort((a, b) => a.startDateTime.compareTo(b.startDateTime));
     return list;
   }
 
@@ -57,11 +56,11 @@ class ActivityController extends GetxController {
       case ActivityFilter.nearest:
         final limit = _today().add(const Duration(days: 7));
         list =
-            list.where((a) => DateTime.parse(a.date).isBefore(limit)).toList();
+            list.where((a) => a.startDateTime.isBefore(limit)).toList();
         break;
       case ActivityFilter.weekend:
         list = list.where((a) {
-          final w = DateTime.parse(a.date).weekday;
+          final w = a.startDateTime.weekday;
           return w == DateTime.saturday || w == DateTime.sunday;
         }).toList();
         break;
@@ -91,7 +90,7 @@ class ActivityController extends GetxController {
     for (final r in myRegistrations) {
       if (r.status == RegistrationStatus.rejected) continue;
       final a = byId(r.activityId);
-      final d = a == null ? null : DateTime.tryParse(a.date);
+      final d = a?.startDateTime;
       if (d == null || d.isBefore(today)) continue;
       if (next == null || d.isBefore(next)) next = d;
     }
@@ -173,15 +172,32 @@ class ActivityController extends GetxController {
     final sunday = saturday.add(const Duration(days: 1));
     const org = 'PMI Bandung';
 
+    final act1 = BloodActivity.dateTimeRangeFromString(
+      Fmt.isoDate(saturday),
+      '09:00 - 13:00',
+    );
+    final act2 = BloodActivity.dateTimeRangeFromString(
+      Fmt.isoDate(sunday),
+      '08:00 - 12:00',
+    );
+    final act3 = BloodActivity.dateTimeRangeFromString(
+      Fmt.isoDate(today.add(const Duration(days: 8))),
+      '10:00 - 14:00',
+    );
+    final act4 = BloodActivity.dateTimeRangeFromString(
+      Fmt.isoDate(today.add(const Duration(days: 2))),
+      '09:00 - 12:00',
+    );
+
     activities.assignAll([
       BloodActivity(
         id: 'act-1',
         title: 'Donor Darah Peduli Sesama',
         location: 'PMI Kota Bandung, Jl. Aceh No. 45',
-        date: Fmt.isoDate(saturday),
-        time: '09:00 - 13:00',
+        startDateTime: act1?.$1 ?? DateTime.now(),
+        endDateTime: act1?.$2 ?? DateTime.now(),
         organizer: org,
-        bloodGroups: 'O+, O-, A+, B+',
+        bloodGroups: BloodActivity.bloodGroupsFromString('O+, O-, A+, B+'),
         description: '',
         quota: 100,
         registered: 4,
@@ -190,10 +206,10 @@ class ActivityController extends GetxController {
         id: 'act-2',
         title: 'Berbagi untuk Negeri',
         location: 'RS Harapan Sehat, Jl. Merdeka No. 12',
-        date: Fmt.isoDate(sunday),
-        time: '08:00 - 12:00',
+        startDateTime: act2?.$1 ?? DateTime.now(),
+        endDateTime: act2?.$2 ?? DateTime.now(),
         organizer: org,
-        bloodGroups: 'A+, A-',
+        bloodGroups: BloodActivity.bloodGroupsFromString('A+, A-'),
         description: '',
         quota: 80,
         registered: 2,
@@ -202,10 +218,10 @@ class ActivityController extends GetxController {
         id: 'act-3',
         title: 'Sehat Bersama',
         location: 'Klinik Medika, Jl. Cendana No. 9',
-        date: Fmt.isoDate(today.add(const Duration(days: 8))),
-        time: '10:00 - 14:00',
+        startDateTime: act3?.$1 ?? DateTime.now(),
+        endDateTime: act3?.$2 ?? DateTime.now(),
         organizer: org,
-        bloodGroups: 'B+, B-',
+        bloodGroups: BloodActivity.bloodGroupsFromString('B+, B-'),
         description: '',
         quota: 60,
         registered: 0,
@@ -214,10 +230,12 @@ class ActivityController extends GetxController {
         id: 'act-4',
         title: 'Aksi Donor Kampus',
         location: 'Aula Kampus, Jl. Dipati Ukur',
-        date: Fmt.isoDate(today.add(const Duration(days: 2))),
-        time: '09:00 - 12:00',
+        startDateTime: act4?.$1 ?? DateTime.now(),
+        endDateTime: act4?.$2 ?? DateTime.now(),
         organizer: org,
-        bloodGroups: 'A+, A-, B+, B-, O+, O-, AB+, AB-',
+        bloodGroups: BloodActivity.bloodGroupsFromString(
+          'A+, A-, B+, B-, O+, O-, AB+, AB-',
+        ),
         description: '',
         quota: 150,
         registered: 1,

@@ -28,17 +28,6 @@ class ActivityService {
       return;
     }
 
-    await repository.updateAsync(BloodActivity(
-      id: activity.id,
-      title: activity.title,
-      description: activity.description,
-      bloodGroups: activity.bloodGroups,
-      organizer: activity.organizer,
-      location: activity.location,
-      quota: activity.quota,
-      date: activity.date,
-      time: activity.time,
-      registered: activity.registered + 1,
-    ));
+    await repository.updateAsync(activity.copyWith(registered: activity.registered + 1));
   }
 }

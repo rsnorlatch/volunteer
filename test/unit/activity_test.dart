@@ -5,6 +5,7 @@ import 'package:volunteer/adapter/activity_repository/fake_activity_repository.d
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/session_manager/fake_session_manager.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/bloodtype.dart';
 import 'package:volunteer/entities/profile.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/activity_service.dart';
@@ -49,12 +50,12 @@ void main() {
     await service.createActivityAsync(BloodActivity.create(
       title: "activity 1",
       description: "activity 1",
-      date: "2026-11-12",
-      time: "09.00 - 12.00",
+      startDateTime: DateTime(2026, 11, 12, 9, 0),
+      endDateTime: DateTime(2026, 11, 12, 12, 0),
       quota: 100,
       location: "somewhere",
       organizer: "PMI",
-      bloodGroups: "AB",
+      bloodGroups: [BloodType.abPlus],
     ));
 
     expect(repo.getAll(), isNotEmpty);
@@ -66,12 +67,12 @@ void main() {
     await service.createActivityAsync(BloodActivity.create(
       title: "activity 1",
       description: "activity 1",
-      date: "2026-11-12",
-      time: "09.00 - 12.00",
+      startDateTime: DateTime(2026, 11, 12, 9, 0),
+      endDateTime: DateTime(2026, 11, 12, 12, 0),
       quota: 100,
       location: "somewhere",
       organizer: "PMI",
-      bloodGroups: "AB",
+      bloodGroups: [BloodType.abPlus],
     ));
 
     expect(repo.getAll(), isEmpty);
@@ -86,12 +87,12 @@ void main() {
     await service.createActivityAsync(BloodActivity.create(
       title: "activity 1",
       description: "activity 1",
-      date: "2026-11-12",
-      time: "09.00 - 12.00",
+      startDateTime: DateTime(2026, 11, 12, 9, 0),
+      endDateTime: DateTime(2026, 11, 12, 12, 0),
       quota: 100,
       location: "somewhere",
       organizer: "PMI",
-      bloodGroups: "AB",
+      bloodGroups: [BloodType.abPlus],
     ));
 
     expect(repo.getAll(), isEmpty);
@@ -107,12 +108,12 @@ void main() {
       id: activityId,
       title: "activity 1",
       description: "activity 1",
-      date: "2026-11-12",
-      time: "09.00 - 12.00",
+      startDateTime: DateTime(2026, 11, 12, 9, 0),
+      endDateTime: DateTime(2026, 11, 12, 12, 0),
       quota: 100,
       location: "somewhere",
       organizer: "PMI",
-      bloodGroups: "AB",
+      bloodGroups: [BloodType.abPlus],
     ));
 
     await session.destroyAsync();
@@ -140,12 +141,12 @@ void main() {
       id: activityId,
       title: "activity 1",
       description: "activity 1",
-      date: "2026-11-12",
-      time: "09.00 - 12.00",
+      startDateTime: DateTime(2026, 11, 12, 9, 0),
+      endDateTime: DateTime(2026, 11, 12, 12, 0),
       quota: 100,
       location: "somewhere",
       organizer: "PMI",
-      bloodGroups: "AB",
+      bloodGroups: [BloodType.abPlus],
     ));
 
     await session.destroyAsync();

@@ -62,7 +62,8 @@ class ActivityCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  meta ?? '${Fmt.shortDate(a.date)} • ${Fmt.timeRange(a.time)}',
+                  meta ??
+                      '${Fmt.shortOf(a.startDateTime)} • ${Fmt.timeRangeOf(a.startDateTime, a.endDateTime)}',
                   style: const TextStyle(
                       fontSize: 12, color: AppColors.textSecondary),
                 ),
@@ -70,7 +71,7 @@ class ActivityCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          badge ?? StatusPill(Fmt.badge(a.bloodGroups)),
+          badge ?? StatusPill(Fmt.badgeBloodTypes(a.bloodGroups)),
         ],
       ),
     );

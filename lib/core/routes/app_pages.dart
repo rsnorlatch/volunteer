@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import 'package:volunteer/core/routes/app_routes.dart';
+import 'package:volunteer/pages/auth/auth_binding.dart';
 import 'package:volunteer/pages/auth/login_page.dart';
 import 'package:volunteer/pages/auth/signup_page.dart';
 import 'package:volunteer/pages/donor/activity_detail_page.dart';
@@ -23,7 +24,10 @@ class AppPages {
 
   static final pages = <GetPage<dynamic>>[
     GetPage(name: AppRoutes.splash, page: () => const SplashPage()),
-    GetPage(name: AppRoutes.login, page: () => const LoginPage()),
+    GetPage(
+      name: AppRoutes.login,
+      page: () => const LoginPage(),
+    ),
     GetPage(name: AppRoutes.signup, page: () => const SignUpPage()),
     GetPage(
       name: AppRoutes.home,

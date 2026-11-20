@@ -55,7 +55,7 @@ class HistoryPage extends StatelessWidget {
                                 Text(
                                   a == null
                                       ? 'Terdaftar ${Fmt.shortOf(r.createdAt)}'
-                                      : '${Fmt.shortDate(a.date)} • ${a.location}',
+                                      : '${Fmt.shortOf(a.startDateTime)} • ${a.location}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(

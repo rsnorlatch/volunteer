@@ -73,7 +73,7 @@ class RegistrationStatusPage extends StatelessWidget {
                           Text(
                             a == null
                                 ? '-'
-                                : '${Fmt.shortDate(a.date)} • ${a.location}',
+                                : '${Fmt.shortOf(a.startDateTime)} • ${a.location}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

@@ -98,7 +98,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   style: const TextStyle(
                       fontSize: 12, color: AppColors.textSecondary)),
               const SizedBox(height: 8),
-              Text('${Fmt.shortDate(a.date)} • ${Fmt.timeRange(a.time)}',
+              Text(
+                  '${Fmt.shortOf(a.startDateTime)} • ${Fmt.timeRangeOf(a.startDateTime, a.endDateTime)}',
                   style: const TextStyle(
                       fontSize: 12, color: AppColors.textSecondary)),
             ],

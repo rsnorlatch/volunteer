@@ -14,4 +14,10 @@ class Profile {
     this.userId = userId;
     return this;
   }
+
+  Profile withId(String id) {
+    this.id = id;
+
+    return this;
+  }
 }
