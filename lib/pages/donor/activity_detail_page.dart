@@ -17,6 +17,16 @@ class ActivityDetailPage extends StatelessWidget {
     final ctrl = Get.find<ActivityController>();
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          'Detail kegiatan',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Obx(() {
           final a = ctrl.byId(id);
@@ -35,18 +45,6 @@ class ActivityDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(
-                  onTap: () => Get.back(),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text('‹ Kembali ke kegiatan',
-                        style: TextStyle(
-                            color: AppColors.primaryColor,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 Container(
                   height: 150,
                   width: double.infinity,

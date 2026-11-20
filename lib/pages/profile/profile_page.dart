@@ -53,7 +53,19 @@ class ProfilePage extends StatelessWidget {
     final profile = Get.find<ProfileController>();
     final act = Get.find<ActivityController>();
 
-    return SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Profil',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,6 +184,7 @@ class ProfilePage extends StatelessWidget {
           _MenuItem('Bantuan & informasi', _showHelp),
           _MenuItem('Keluar', _confirmLogout),
         ],
+      ),
       ),
     );
   }

@@ -20,7 +20,19 @@ class ActivityListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = Get.find<ActivityController>();
 
-    return SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Kegiatan',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,6 +84,7 @@ class ActivityListPage extends StatelessWidget {
             );
           }),
         ],
+      ),
       ),
     );
   }

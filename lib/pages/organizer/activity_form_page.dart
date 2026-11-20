@@ -157,9 +157,10 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     String? dateErr;
     String? timeErr;
     String? groupErr;
-    if (_date == null)
+    if (_date == null) {
       dateErr =
           widget.isEdit ? 'Waktu mulai wajib diisi' : 'Tanggal wajib diisi';
+    }
     if (_start == null || _end == null) {
       timeErr = widget.isEdit
           ? 'Waktu wajib diisi'
@@ -174,8 +175,9 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       _timeErr = timeErr;
       _groupErr = groupErr;
     });
-    if (!formOk || dateErr != null || timeErr != null || groupErr != null)
+    if (!formOk || dateErr != null || timeErr != null || groupErr != null) {
       return;
+    }
 
     final groups = AppConstants.bloodTypes.where(_groups.contains).join(', ');
     final date = Fmt.isoDate(_date!);

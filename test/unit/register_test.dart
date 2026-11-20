@@ -4,7 +4,6 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
-import 'package:volunteer/adapter/session_manager/fake_session_manager.dart';
 import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';

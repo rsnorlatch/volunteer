@@ -30,36 +30,54 @@ class _SplashPageState extends State<SplashPage> {
         child: Stack(
           children: [
             Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    height: 180,
-                    width: 180,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 180,
+                      width: 180,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(48),
+                      ),
+                      child: const Icon(
+                        Icons.favorite,
+                        color: AppColors.primaryColor,
+                        size: 84,
+                      ),
                     ),
-                    child: const Icon(Icons.favorite,
-                        color: AppColors.primaryColor, size: 84),
-                  ),
-                  const SizedBox(height: 40),
-                  const Text(
-                    'Volunteer -\nBloodDonor',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
+                    const SizedBox(height: 36),
+                    const Text(
+                      'Volunteer',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    AppConstants.tagline,
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ],
+                    const Text(
+                      'BloodDonor',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    const Text(
+                      AppConstants.tagline,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFFF4C8D1),
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const Positioned(
@@ -70,7 +88,10 @@ class _SplashPageState extends State<SplashPage> {
                 child: Text(
                   'DONOR  •  ORGANIZER',
                   style: TextStyle(
-                      color: Colors.white, fontSize: 11, letterSpacing: 1),
+                    color: Color(0xFFF4C8D1),
+                    fontSize: 18,
+                    letterSpacing: 4,
+                  ),
                 ),
               ),
             ),

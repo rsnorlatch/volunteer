@@ -40,31 +40,49 @@ class SubPageScaffold extends StatelessWidget {
     required this.title,
     required this.children,
     this.subtitle,
+    this.appBarTitle,
   });
 
   final String title;
   final String? subtitle;
   final List<Widget> children;
+  final String? appBarTitle;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.primaryColor,
+        foregroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
-        toolbarHeight: 48,
+        toolbarHeight: 56,
+        title: Text(
+          appBarTitle ?? title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PageHeader(title: title, subtitle: subtitle),
-              const SizedBox(height: 24),
+              if (subtitle != null) ...[
+                Text(
+                  subtitle!,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
               ...children,
             ],
           ),

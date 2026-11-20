@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/pages/auth/auth_controller.dart';
 import 'package:volunteer/pages/auth/widgets/role_selector.dart';
@@ -43,8 +44,11 @@ class _SignUpPageState extends State<SignUpPage> {
       showAppSnack(error, error: true);
       return;
     }
-    showAppSnack('Akun berhasil dibuat. Silakan masuk.');
-    Get.back();
+    showAppSnack(
+      'Akun berhasil dibuat. Silakan masuk.',
+      success: true,
+    );
+    Get.offNamed(AppRoutes.login);
   }
 
   @override
@@ -52,6 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return SubPageScaffold(
       title: 'Buat akun baru',
       subtitle: 'Mulai perjalanan kecil untuk menyelamatkan hidup.',
+      appBarTitle: 'Sign-up',
       children: [
         Form(
           key: _formKey,
