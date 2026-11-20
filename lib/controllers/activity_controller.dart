@@ -6,6 +6,7 @@ import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/data/models/activity.dart';
 import 'package:volunteer/data/models/app_notification.dart';
 import 'package:volunteer/data/models/registration.dart';
+import 'package:volunteer/entities/role.dart';
 
 enum ActivityFilter { all, nearest, weekend }
 
@@ -130,8 +131,19 @@ class ActivityController extends GetxController {
 
   // ---------- Organizer ----------
 
-  List<BloodActivity> activitiesOf(String organizer) =>
-      activities.where((a) => a.organizer == organizer).toList();
+  List<BloodActivity> activitiesOf(String ownerEmail) => activities
+      .where((a) => a.ownerEmail.toLowerCase() == ownerEmail.toLowerCase())
+      .toList();
+
+  bool canManageActivity(String activityId) {
+    final activity = byId(activityId);
+    final email = _profile.email.value.trim().toLowerCase();
+    return _profile.role.value == Role.organizer &&
+        !_profile.isGuest.value &&
+        email.isNotEmpty &&
+        activity != null &&
+        activity.ownerEmail.toLowerCase() == email;
+  }
 
   List<Registration> registrantsOf(String activityId) {
     final list =
@@ -140,24 +152,60 @@ class ActivityController extends GetxController {
     return list;
   }
 
-  void addActivity(BloodActivity a) => activities.insert(0, a);
-
-  void updateActivity(BloodActivity a) {
-    final i = activities.indexWhere((x) => x.id == a.id);
-    if (i >= 0) activities[i] = a;
+  bool addActivity(BloodActivity a) {
+    final email = _profile.email.value.trim();
+    if (_profile.role.value != Role.organizer ||
+        _profile.isGuest.value ||
+        email.isEmpty) {
+      return false;
+    }
+    activities.insert(0, a.copyWith(ownerEmail: email));
+    return true;
   }
 
-  void deleteActivity(String id) {
+  bool updateActivity(BloodActivity a) {
+    if (!canManageActivity(a.id)) return false;
+    final i = activities.indexWhere((x) => x.id == a.id);
+    if (i < 0) return false;
+    activities[i] = a.copyWith(ownerEmail: activities[i].ownerEmail);
+    return true;
+  }
+
+  bool deleteActivity(String id) {
+    if (!canManageActivity(id)) return false;
     activities.removeWhere((a) => a.id == id);
     registrations.removeWhere((r) => r.activityId == id);
+    return true;
   }
 
-  void setRegistrantStatus(String id, RegistrationStatus status) {
+  bool setRegistrantStatus(String id, RegistrationStatus status) {
     final i = registrations.indexWhere((r) => r.id == id);
-    if (i >= 0) {
-      registrations[i].status = status;
-      registrations.refresh();
+    if (i < 0 || !canManageActivity(registrations[i].activityId)) return false;
+    final registration = registrations[i];
+    if (registration.status == status) return true;
+
+    final activityIndex =
+        activities.indexWhere((a) => a.id == registration.activityId);
+    final activity = activities[activityIndex];
+    if (status != RegistrationStatus.rejected &&
+        registration.status == RegistrationStatus.rejected &&
+        activity.registered >= activity.quota) {
+      return false;
     }
+
+    if (status == RegistrationStatus.rejected &&
+        registration.status != RegistrationStatus.rejected) {
+      activities[activityIndex] = activity.copyWith(
+        registered: (activity.registered - 1).clamp(0, activity.quota),
+      );
+    } else if (status != RegistrationStatus.rejected &&
+        registration.status == RegistrationStatus.rejected) {
+      activities[activityIndex] =
+          activity.copyWith(registered: activity.registered + 1);
+    }
+    registration.status = status;
+    registrations.refresh();
+    return true;
   }
 
   // ---------- Data dummy ----------

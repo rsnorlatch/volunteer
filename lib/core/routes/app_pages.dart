@@ -1,6 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
+import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/pages/auth/login_page.dart';
 import 'package:volunteer/pages/auth/signup_page.dart';
 import 'package:volunteer/pages/donor/activity_detail_page.dart';
@@ -15,6 +18,7 @@ import 'package:volunteer/pages/organizer/activity_form_page.dart';
 import 'package:volunteer/pages/organizer/dashboard_page.dart';
 import 'package:volunteer/pages/organizer/manage_activities_page.dart';
 import 'package:volunteer/pages/organizer/registrants_page.dart';
+import 'package:volunteer/pages/profile/profile_page.dart';
 import 'package:volunteer/pages/profile/edit_profile_page.dart';
 import 'package:volunteer/pages/splash/splash_page.dart';
 
@@ -43,16 +47,46 @@ class AppPages {
     GetPage(name: AppRoutes.history, page: () => const HistoryPage()),
     GetPage(name: AppRoutes.editProfile, page: () => const EditProfilePage()),
     GetPage(
-        name: AppRoutes.organizerDashboard, page: () => const DashboardPage()),
+      name: AppRoutes.organizerProfile,
+      page: () => const ProfilePage(),
+      middlewares: [OrganizerOnlyMiddleware()],
+    ),
     GetPage(
-        name: AppRoutes.createActivity, page: () => const ActivityFormPage()),
+      name: AppRoutes.organizerDashboard,
+      page: () => const DashboardPage(),
+      middlewares: [OrganizerOnlyMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.createActivity,
+      page: () => const ActivityFormPage(),
+      middlewares: [OrganizerOnlyMiddleware()],
+    ),
     GetPage(
         name: AppRoutes.editActivity,
-        page: () => const ActivityFormPage(isEdit: true)),
+        page: () => const ActivityFormPage(isEdit: true),
+        middlewares: [OrganizerOnlyMiddleware()]),
     GetPage(
         name: AppRoutes.manageActivities,
-        page: () => const ManageActivitiesPage()),
+        page: () => const ManageActivitiesPage(),
+        middlewares: [OrganizerOnlyMiddleware()]),
     GetPage(
-        name: AppRoutes.manageRegistrants, page: () => const RegistrantsPage()),
+      name: AppRoutes.manageRegistrants,
+      page: () => const RegistrantsPage(),
+      middlewares: [OrganizerOnlyMiddleware()],
+    ),
   ];
+}
+
+class OrganizerOnlyMiddleware extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    final profile = Get.find<ProfileController>();
+    if (profile.isGuest.value) {
+      return const RouteSettings(name: AppRoutes.login);
+    }
+    if (profile.role.value != Role.organizer) {
+      return const RouteSettings(name: AppRoutes.home);
+    }
+    return null;
+  }
 }

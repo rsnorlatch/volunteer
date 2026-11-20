@@ -16,7 +16,9 @@ class ActivityService {
 
     if (currentProfile.role != Role.organizer) return;
 
-    await repository.insertAsync(activity);
+    await repository.insertAsync(
+      activity.copyWith(ownerEmail: currentProfile.email),
+    );
   }
 
   Future<void> applyAsync(String activityId) async {

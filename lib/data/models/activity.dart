@@ -7,6 +7,7 @@ class BloodActivity {
   final String date;
   final String time;
   final String organizer;
+  final String ownerEmail;
   final String bloodGroups;
   final String description;
   final int quota;
@@ -19,6 +20,7 @@ class BloodActivity {
     required this.date,
     required this.time,
     required this.organizer,
+    this.ownerEmail = '',
     required this.bloodGroups,
     required this.description,
     required this.quota,
@@ -32,6 +34,7 @@ class BloodActivity {
     String? date,
     String? time,
     String? organizer,
+    String? ownerEmail,
     String? bloodGroups,
     String? description,
     int? quota,
@@ -44,6 +47,7 @@ class BloodActivity {
       date: date ?? this.date,
       time: time ?? this.time,
       organizer: organizer ?? this.organizer,
+      ownerEmail: ownerEmail ?? this.ownerEmail,
       bloodGroups: bloodGroups ?? this.bloodGroups,
       description: description ?? this.description,
       quota: quota ?? this.quota,
@@ -58,6 +62,7 @@ class BloodActivity {
     required String date,
     required String time,
     required String organizer,
+    String ownerEmail = '',
     required String bloodGroups,
     required String description,
     required int quota,
@@ -69,6 +74,7 @@ class BloodActivity {
         date: date,
         time: time,
         organizer: organizer,
+        ownerEmail: ownerEmail,
         bloodGroups: bloodGroups,
         description: description,
         quota: quota,

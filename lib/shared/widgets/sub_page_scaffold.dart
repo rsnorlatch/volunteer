@@ -41,12 +41,14 @@ class SubPageScaffold extends StatelessWidget {
     required this.children,
     this.subtitle,
     this.appBarTitle,
+    this.bottomNavigationBar,
   });
 
   final String title;
   final String? subtitle;
   final List<Widget> children;
   final String? appBarTitle;
+  final Widget? bottomNavigationBar;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,7 @@ class SubPageScaffold extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.primaryColor,
         foregroundColor: Colors.white,
+        centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -88,6 +91,7 @@ class SubPageScaffold extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 }

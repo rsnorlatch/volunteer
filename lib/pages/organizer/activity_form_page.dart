@@ -7,6 +7,7 @@ import 'package:volunteer/core/constants/app_constants.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -48,7 +49,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     super.initState();
     if (widget.isEdit) {
       final a = _ctrl.byId(Get.arguments as String);
-      _existing = a;
+      _existing = a != null && _ctrl.canManageActivity(a.id) ? a : null;
       if (a != null) {
         _title.text = a.title;
         _location.text = a.location;
@@ -184,18 +185,22 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final time = '${Fmt.hhmm(_start!)} - ${Fmt.hhmm(_end!)}';
 
     if (widget.isEdit && _existing != null) {
-      _ctrl.updateActivity(_existing!.copyWith(
+      final updated = _ctrl.updateActivity(_existing!.copyWith(
         title: _title.text.trim(),
         location: _location.text.trim(),
         date: date,
         time: time,
         bloodGroups: groups,
       ));
+      if (!updated) {
+        showAppSnack('Kegiatan tidak dapat diperbarui.', error: true);
+        return;
+      }
       Get.back();
       showAppSnack('Kegiatan berhasil diperbarui.');
     } else {
       final quota = int.parse(_quota.text.replaceAll(RegExp(r'[^0-9]'), ''));
-      _ctrl.addActivity(BloodActivity.create(
+      final created = _ctrl.addActivity(BloodActivity.create(
         title: _title.text.trim(),
         location: _location.text.trim(),
         date: date,
@@ -205,6 +210,11 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         description: '',
         quota: quota,
       ));
+      if (!created) {
+        showAppSnack('Hanya penyelenggara yang dapat membuat kegiatan.',
+            error: true);
+        return;
+      }
       Get.back();
       showAppSnack('Kegiatan berhasil dipublikasikan.');
     }
@@ -214,8 +224,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   Widget build(BuildContext context) {
     final edit = widget.isEdit;
     if (edit && _existing == null) {
-      return const Scaffold(
-        body: EmptyState(
+      return Scaffold(
+        body: const EmptyState(
           icon: Icons.event_busy_outlined,
           title: 'Kegiatan tidak ditemukan',
           message: 'Kegiatan ini mungkin sudah dihapus.',
@@ -230,6 +240,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       subtitle: edit
           ? 'Ubah detail kegiatan yang sudah dibuat.'
           : 'Lengkapi informasi kegiatan donor darah.',
+      bottomNavigationBar: const OrganizerBottomNavigationBar(currentIndex: 1),
       children: [
         Form(
           key: _formKey,
