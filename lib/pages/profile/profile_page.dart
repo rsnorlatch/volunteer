@@ -5,7 +5,9 @@ import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/data/models/registration.dart';
+import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/pages/auth/auth_controller.dart';
+import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -53,128 +55,206 @@ class ProfilePage extends StatelessWidget {
     final profile = Get.find<ProfileController>();
     final act = Get.find<ActivityController>();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const PageHeader(
-            title: 'Profil saya',
-            subtitle: 'Kelola informasi dan aktivitas donor kamu.',
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Profil',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
           ),
-          const SizedBox(height: 20),
-          Obx(() => AppCard(
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const PageHeader(
+              title: 'Profil saya',
+              subtitle: 'Kelola informasi akun dan aktivitas kamu.',
+            ),
+            const SizedBox(height: 20),
+            Obx(() => AppCard(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 76,
+                        height: 76,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryLight,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(profile.initial,
+                            style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primaryColor)),
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(profile.name.value,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textPrimary)),
+                            const SizedBox(height: 6),
+                            Text(
+                              profile.isGuest.value
+                                  ? 'Pendonor • Mode tamu'
+                                  : profile.role.value == Role.organizer
+                                      ? 'Penyelenggara • Bergabung ${profile.joinedYear}'
+                                      : 'Pendonor • Bergabung ${profile.joinedYear}',
+                              style: const TextStyle(
+                                  fontSize: 11, color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: 10),
+                            StatusPill(
+                              profile.isGuest.value
+                                  ? 'Tamu'
+                                  : profile.role.value == Role.organizer
+                                      ? 'Penyelenggara aktif'
+                                      : 'Pendonor aktif',
+                              tone: profile.isGuest.value
+                                  ? PillTone.neutral
+                                  : PillTone.success,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+            const SizedBox(height: 16),
+            Obx(() {
+              if (profile.role.value == Role.organizer) {
+                final mine = act.activitiesOf(profile.email.value);
+                final active = mine.where(act.isActive).length;
+                final registrants = mine.fold<int>(
+                  0,
+                  (sum, activity) =>
+                      sum + act.registrantsOf(activity.id).length,
+                );
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _profileStat('Kegiatan aktif', '$active'),
+                      ),
+                      Expanded(
+                        child: _profileStat('Total pendaftar', '$registrants'),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              final done = act.myRegistrations
+                  .where((r) => r.status == RegistrationStatus.accepted)
+                  .length;
+              return Container(
+                width: double.infinity,
                 padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryLight,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Row(
                   children: [
-                    Container(
-                      width: 76,
-                      height: 76,
-                      alignment: Alignment.center,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(profile.initial,
-                          style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primaryColor)),
-                    ),
-                    const SizedBox(width: 18),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(profile.name.value,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          const Text('Total donor',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary)),
+                          const SizedBox(height: 8),
+                          Text('$done kali',
+                              style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primaryColor)),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Donor berikutnya',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary)),
+                          const SizedBox(height: 8),
+                          Text(act.nextDonorLabel,
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary)),
-                          const SizedBox(height: 6),
-                          Text(
-                            profile.isGuest.value
-                                ? 'Pendonor • Mode tamu'
-                                : 'Pendonor • Bergabung ${profile.joinedYear}',
-                            style: const TextStyle(
-                                fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                          const SizedBox(height: 10),
-                          StatusPill(
-                            profile.isGuest.value ? 'Tamu' : 'Pendonor aktif',
-                            tone: profile.isGuest.value
-                                ? PillTone.neutral
-                                : PillTone.success,
-                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              )),
-          const SizedBox(height: 16),
-          Obx(() {
-            final done = act.myRegistrations
-                .where((r) => r.status == RegistrationStatus.accepted)
-                .length;
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Total donor',
-                            style: TextStyle(
-                                fontSize: 11, color: AppColors.textSecondary)),
-                        const SizedBox(height: 8),
-                        Text('$done kali',
-                            style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primaryColor)),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Donor berikutnya',
-                            style: TextStyle(
-                                fontSize: 11, color: AppColors.textSecondary)),
-                        const SizedBox(height: 8),
-                        Text(act.nextDonorLabel,
-                            style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-          const SizedBox(height: 20),
-          _MenuItem('Data pribadi', () => Get.toNamed(AppRoutes.editProfile)),
-          _MenuItem('Riwayat donor', () => Get.toNamed(AppRoutes.history)),
-          _MenuItem('Pengaturan akun',
-              () => showAppSnack('Pengaturan akun segera hadir.')),
-          _MenuItem('Bantuan & informasi', _showHelp),
-          _MenuItem('Keluar', _confirmLogout),
-        ],
+              );
+            }),
+            const SizedBox(height: 20),
+            _MenuItem('Data pribadi', () => Get.toNamed(AppRoutes.editProfile)),
+            if (profile.role.value == Role.organizer)
+              _MenuItem(
+                'Kelola kegiatan',
+                () => Get.toNamed(AppRoutes.manageActivities),
+              )
+            else
+              _MenuItem('Riwayat donor', () => Get.toNamed(AppRoutes.history)),
+            _MenuItem('Pengaturan akun',
+                () => showAppSnack('Pengaturan akun segera hadir.')),
+            _MenuItem('Bantuan & informasi', _showHelp),
+            _MenuItem('Keluar', _confirmLogout),
+          ],
+        ),
       ),
+      bottomNavigationBar: profile.role.value == Role.organizer
+          ? const OrganizerBottomNavigationBar(currentIndex: 3)
+          : null,
     );
   }
+}
+
+Widget _profileStat(String label, String value) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        value,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: AppColors.primaryColor,
+        ),
+      ),
+    ],
+  );
 }
 
 class _MenuItem extends StatelessWidget {

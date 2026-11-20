@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:volunteer/controllers/activity_controller.dart';
-import 'package:volunteer/controllers/notification_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/formatters.dart';
@@ -18,10 +17,21 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final profile = Get.find<ProfileController>();
     final activity = Get.find<ActivityController>();
-    final notif = Get.find<NotificationController>();
     final shell = Get.find<ShellController>();
 
-    return SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Homepage',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,28 +59,6 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              Obx(() => Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      IconButton(
-                        onPressed: () => Get.toNamed(AppRoutes.notifications),
-                        icon: const Icon(Icons.notifications_none_rounded,
-                            color: AppColors.textPrimary),
-                      ),
-                      if (notif.unreadCount > 0)
-                        Positioned(
-                          right: 10,
-                          top: 10,
-                          child: Container(
-                            width: 9,
-                            height: 9,
-                            decoration: const BoxDecoration(
-                                color: AppColors.primaryColor,
-                                shape: BoxShape.circle),
-                          ),
-                        ),
-                    ],
-                  )),
             ],
           ),
           const SizedBox(height: 24),
@@ -188,6 +176,7 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

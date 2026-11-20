@@ -15,6 +15,7 @@ class AppRoutes {
   static const editProfile = '/edit-profile';
 
   static const organizerDashboard = '/organizer';
+  static const organizerProfile = '/organizer/profile';
   static const createActivity = '/create-activity';
   static const editActivity = '/edit-activity';
   static const manageActivities = '/manage-activities';

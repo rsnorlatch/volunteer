@@ -6,6 +6,7 @@ import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/pages/auth/auth_controller.dart';
+import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/activity_card.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -20,11 +21,33 @@ class DashboardPage extends StatelessWidget {
     final ctrl = Get.find<ActivityController>();
 
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: const Text(
+          'Panel Penyelenggara',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        actions: [
+          IconButton(
+            tooltip: 'Keluar',
+            onPressed: () => Get.find<AuthController>().logout(),
+            icon: const Icon(Icons.logout, color: Colors.white),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Obx(() {
-          final mine = ctrl.activitiesOf(profile.name.value);
+          final mine = ctrl.activitiesOf(profile.email.value);
           final active = mine.where(ctrl.isActive).length;
-          final registrants = mine.fold<int>(0, (sum, a) => sum + a.registered);
+          final registrants = mine.fold<int>(
+            0,
+            (sum, activity) => sum + ctrl.registrantsOf(activity.id).length,
+          );
 
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
@@ -38,13 +61,6 @@ class DashboardPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('PANEL PENYELENGGARA',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.5,
-                                  color: AppColors.primaryColor)),
-                          const SizedBox(height: 12),
                           Text('Halo, ${profile.name.value}',
                               style: const TextStyle(
                                   fontSize: 26,
@@ -57,12 +73,6 @@ class DashboardPage extends StatelessWidget {
                                   color: AppColors.textSecondary)),
                         ],
                       ),
-                    ),
-                    IconButton(
-                      tooltip: 'Keluar',
-                      onPressed: () => Get.find<AuthController>().logout(),
-                      icon: const Icon(Icons.logout,
-                          color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -130,6 +140,7 @@ class DashboardPage extends StatelessWidget {
           );
         }),
       ),
+      bottomNavigationBar: const OrganizerBottomNavigationBar(currentIndex: 0),
     );
   }
 }

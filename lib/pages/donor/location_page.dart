@@ -16,7 +16,19 @@ class LocationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = Get.find<FacilityController>();
 
-    return SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Lokasi',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,6 +118,7 @@ class LocationPage extends StatelessWidget {
             );
           }),
         ],
+      ),
       ),
     );
   }

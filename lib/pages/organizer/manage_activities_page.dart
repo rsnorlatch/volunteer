@@ -6,6 +6,7 @@ import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -42,8 +43,11 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
       ),
     );
     if (ok == true) {
-      _ctrl.deleteActivity(a.id);
-      showAppSnack('Kegiatan dihapus.');
+      if (_ctrl.deleteActivity(a.id)) {
+        showAppSnack('Kegiatan dihapus.');
+      } else {
+        showAppSnack('Kegiatan tidak dapat dihapus.', error: true);
+      }
     }
   }
 
@@ -52,6 +56,7 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
     return SubPageScaffold(
       title: 'Kelola kegiatan',
       subtitle: 'Atur kegiatan donor yang kamu selenggarakan.',
+      bottomNavigationBar: const OrganizerBottomNavigationBar(currentIndex: 1),
       children: [
         PrimaryButton(
           text: 'Buat kegiatan baru',
@@ -60,7 +65,7 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
         ),
         const SizedBox(height: 20),
         Obx(() {
-          final mine = _ctrl.activitiesOf(_profile.name.value);
+          final mine = _ctrl.activitiesOf(_profile.email.value);
           if (mine.isEmpty) {
             return const EmptyState(
               icon: Icons.event_note_outlined,

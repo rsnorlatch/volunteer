@@ -52,9 +52,21 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: const Text(
+          'Login',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -65,27 +77,12 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Volunteer-BloodDonor',
-                      style: TextStyle(
-                        color: AppColors.primaryColor,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 36),
-                    const Text(
-                      'Selamat datang kembali',
+                      'Selamat datang!',
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Masuk untuk terhubung dan berbagi kehidupan.',
-                      style: TextStyle(
-                          color: AppColors.textSecondary, fontSize: 13),
                     ),
                     const SizedBox(height: 32),
                     CustomTextField(

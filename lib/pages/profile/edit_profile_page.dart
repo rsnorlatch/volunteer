@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:volunteer/controllers/profile_controller.dart';
+import 'package:volunteer/entities/role.dart';
+import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
@@ -56,7 +58,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return SubPageScaffold(
       title: 'Edit profil',
-      subtitle: 'Pastikan informasi pendonor selalu akurat.',
+      subtitle: _profile.role.value == Role.organizer
+          ? 'Pastikan informasi akun selalu akurat.'
+          : 'Pastikan informasi pendonor selalu akurat.',
+      bottomNavigationBar: _profile.role.value == Role.organizer
+          ? const OrganizerBottomNavigationBar(currentIndex: 3)
+          : null,
       children: [
         Form(
           key: _formKey,

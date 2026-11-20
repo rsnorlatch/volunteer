@@ -1,6 +1,5 @@
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
-import 'package:volunteer/adapter/user_repository/user_repository_interface.dart';
 import 'package:volunteer/entities/profile.dart';
 
 class FakeSessionManager implements SessionManagerInterface {
