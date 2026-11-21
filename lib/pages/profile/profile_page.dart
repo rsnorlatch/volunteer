@@ -109,24 +109,18 @@ class ProfilePage extends StatelessWidget {
                                     color: AppColors.textPrimary)),
                             const SizedBox(height: 6),
                             Text(
-                              profile.isGuest.value
-                                  ? 'Pendonor • Mode tamu'
-                                  : profile.role.value == Role.organizer
-                                      ? 'Penyelenggara • Bergabung ${profile.joinedYear}'
-                                      : 'Pendonor • Bergabung ${profile.joinedYear}',
+                              profile.role.value == Role.organizer
+                                  ? 'Penyelenggara • Bergabung ${profile.joinedYear}'
+                                  : 'Pendonor • Bergabung ${profile.joinedYear}',
                               style: const TextStyle(
                                   fontSize: 11, color: AppColors.textSecondary),
                             ),
                             const SizedBox(height: 10),
                             StatusPill(
-                              profile.isGuest.value
-                                  ? 'Tamu'
-                                  : profile.role.value == Role.organizer
-                                      ? 'Penyelenggara aktif'
-                                      : 'Pendonor aktif',
-                              tone: profile.isGuest.value
-                                  ? PillTone.neutral
-                                  : PillTone.success,
+                              profile.role.value == Role.organizer
+                                  ? 'Penyelenggara aktif'
+                                  : 'Pendonor aktif',
+                              tone: PillTone.success,
                             ),
                           ],
                         ),

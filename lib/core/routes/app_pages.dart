@@ -33,19 +33,42 @@ class AppPages {
       name: AppRoutes.home,
       page: () => const MainShellPage(),
       binding: ShellBinding(),
+      middlewares: [DonorOnlyMiddleware()],
     ),
     GetPage(
-        name: AppRoutes.activityDetail, page: () => const ActivityDetailPage()),
-    GetPage(name: AppRoutes.registration, page: () => const RegistrationPage()),
+      name: AppRoutes.activityDetail,
+      page: () => const ActivityDetailPage(),
+      middlewares: [DonorOnlyMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.registration,
+      page: () => const RegistrationPage(),
+      middlewares: [DonorOnlyMiddleware()],
+    ),
     GetPage(
         name: AppRoutes.registrationStatus,
-        page: () => const RegistrationStatusPage()),
+        page: () => const RegistrationStatusPage(),
+        middlewares: [DonorOnlyMiddleware()]),
     GetPage(
-        name: AppRoutes.facilitySearch, page: () => const FacilitySearchPage()),
+      name: AppRoutes.facilitySearch,
+      page: () => const FacilitySearchPage(),
+      middlewares: [DonorOnlyMiddleware()],
+    ),
     GetPage(
-        name: AppRoutes.notifications, page: () => const NotificationsPage()),
-    GetPage(name: AppRoutes.history, page: () => const HistoryPage()),
-    GetPage(name: AppRoutes.editProfile, page: () => const EditProfilePage()),
+      name: AppRoutes.notifications,
+      page: () => const NotificationsPage(),
+      middlewares: [DonorOnlyMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.history,
+      page: () => const HistoryPage(),
+      middlewares: [DonorOnlyMiddleware()],
+    ),
+    GetPage(
+      name: AppRoutes.editProfile,
+      page: () => const EditProfilePage(),
+      middlewares: [AuthenticatedMiddleware()],
+    ),
     GetPage(
       name: AppRoutes.organizerProfile,
       page: () => const ProfilePage(),
@@ -81,11 +104,35 @@ class OrganizerOnlyMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
     final profile = Get.find<ProfileController>();
-    if (profile.isGuest.value) {
+    if (!profile.isAuthenticated.value) {
       return const RouteSettings(name: AppRoutes.login);
     }
     if (profile.role.value != Role.organizer) {
       return const RouteSettings(name: AppRoutes.home);
+    }
+    return null;
+  }
+}
+
+class DonorOnlyMiddleware extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    final profile = Get.find<ProfileController>();
+    if (!profile.isAuthenticated.value) {
+      return const RouteSettings(name: AppRoutes.login);
+    }
+    if (profile.role.value != Role.donor) {
+      return const RouteSettings(name: AppRoutes.organizerDashboard);
+    }
+    return null;
+  }
+}
+
+class AuthenticatedMiddleware extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    if (!Get.find<ProfileController>().isAuthenticated.value) {
+      return const RouteSettings(name: AppRoutes.login);
     }
     return null;
   }

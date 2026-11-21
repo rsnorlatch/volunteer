@@ -8,6 +8,7 @@ import 'package:volunteer/pages/auth/widgets/role_selector.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/custom_text_field.dart';
+import 'package:volunteer/shared/widgets/password_text_field.dart';
 import 'package:volunteer/shared/widgets/primary_button.dart';
 import 'package:volunteer/shared/widgets/sub_page_scaffold.dart';
 
@@ -78,11 +79,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 validator: Validators.email,
               ),
               const SizedBox(height: 16),
-              CustomTextField(
+              PasswordTextField(
                 label: 'Kata sandi',
                 hint: 'Minimal 8 karakter',
                 controller: _password,
-                obscureText: true,
                 validator: Validators.password,
               ),
               const SizedBox(height: 20),

@@ -10,12 +10,10 @@ class ProfileController extends GetxController {
   final bloodType = ''.obs;
   final medicalNotes = ''.obs;
   final role = Role.donor.obs;
-  final isGuest = true.obs;
+  final isAuthenticated = false.obs;
   final joinedYear = DateTime.now().year;
 
-  String get userKey => (isGuest.value || email.value.isEmpty)
-      ? 'guest'
-      : email.value.toLowerCase();
+  String get userKey => email.value.toLowerCase();
 
   String get initial {
     final n = name.value.trim();
@@ -29,17 +27,17 @@ class ProfileController extends GetxController {
     phone.value = '';
     bloodType.value = '';
     medicalNotes.value = '';
-    isGuest.value = false;
+    isAuthenticated.value = true;
   }
 
-  void setGuest() {
-    name.value = 'Sahabat Donor';
+  void clearSession() {
+    name.value = '';
     email.value = '';
     phone.value = '';
     bloodType.value = '';
     medicalNotes.value = '';
     role.value = Role.donor;
-    isGuest.value = true;
+    isAuthenticated.value = false;
   }
 
   void updateProfile({

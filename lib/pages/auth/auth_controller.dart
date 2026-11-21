@@ -78,7 +78,7 @@ class AuthController extends GetxController {
 
   Future<void> logout() async {
     await _auth.logoutAsync();
-    Get.find<ProfileController>().setGuest();
+    Get.find<ProfileController>().clearSession();
     Get.offAllNamed(AppRoutes.login);
   }
 }
