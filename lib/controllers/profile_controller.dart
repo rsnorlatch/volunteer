@@ -25,7 +25,7 @@ class ProfileController extends GetxController {
     email.value = p.email;
     role.value = p.role;
     phone.value = '';
-    bloodType.value = '';
+    bloodType.value = p.bloodType;
     medicalNotes.value = '';
     isAuthenticated.value = true;
   }

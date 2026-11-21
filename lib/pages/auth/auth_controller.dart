@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
+import 'package:volunteer/core/constants/app_constants.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';
@@ -48,11 +49,15 @@ class AuthController extends GetxController {
     required String name,
     required String email,
     required String password,
+    required String bloodType,
   }) async {
     isLoading.value = true;
     try {
       if (await _profiles.getByEmailAsync(email.trim()) != null) {
         return 'Email sudah terdaftar.';
+      }
+      if (!AppConstants.bloodTypes.contains(bloodType)) {
+        return 'Pilih golongan darah kamu.';
       }
       // Desain tidak punya field username -> nama lengkap dipakai sebagai username.
       final dto = RegisterRequestDto(
@@ -61,6 +66,7 @@ class AuthController extends GetxController {
         password,
         password,
         selectedRole.value,
+        bloodType: bloodType,
       );
       final status = await _auth.registerAsync(dto);
       return switch (status) {

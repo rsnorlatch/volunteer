@@ -7,6 +7,7 @@ import 'package:volunteer/pages/auth/auth_controller.dart';
 import 'package:volunteer/pages/auth/widgets/role_selector.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
+import 'package:volunteer/shared/widgets/blood_type_dropdown_field.dart';
 import 'package:volunteer/shared/widgets/custom_text_field.dart';
 import 'package:volunteer/shared/widgets/password_text_field.dart';
 import 'package:volunteer/shared/widgets/primary_button.dart';
@@ -25,6 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _auth = Get.find<AuthController>();
+  String? _bloodType;
 
   @override
   void dispose() {
@@ -40,6 +42,7 @@ class _SignUpPageState extends State<SignUpPage> {
       name: _name.text,
       email: _email.text,
       password: _password.text,
+      bloodType: _bloodType ?? '',
     );
     if (error != null) {
       showAppSnack(error, error: true);
@@ -56,7 +59,6 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return SubPageScaffold(
       title: 'Buat akun baru',
-      subtitle: 'Mulai perjalanan kecil untuk menyelamatkan hidup.',
       appBarTitle: 'Sign-up',
       children: [
         Form(
@@ -77,6 +79,31 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 validator: Validators.email,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Golongan darah',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    BloodTypeDropdownField(
+                      initialValue: _bloodType,
+                      validator: (value) =>
+                          value == null ? 'Pilih golongan darah kamu.' : null,
+                      onChanged: (value) => setState(() {
+                        _bloodType = value;
+                      }),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               PasswordTextField(

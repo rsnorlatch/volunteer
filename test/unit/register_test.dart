@@ -115,4 +115,42 @@ void main() {
     expect(profile, isNotNull);
     expect(profile!.userId, isNotNull);
   });
+
+  test('when registering a donor, profile stores the selected blood type',
+      () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'achilles',
+        'achilles@gmail.com',
+        'Password123',
+        'Password123',
+        Role.donor,
+        bloodType: 'O+',
+      ),
+    );
+
+    final profile = await profiles.getByEmailAsync('achilles@gmail.com');
+
+    expect(profile, isNotNull);
+    expect(profile!.bloodType, 'O+');
+  });
+
+  test('when registering an organizer, profile stores the selected blood type',
+      () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'organizer',
+        'organizer@gmail.com',
+        'Password123',
+        'Password123',
+        Role.organizer,
+        bloodType: 'AB-',
+      ),
+    );
+
+    final profile = await profiles.getByEmailAsync('organizer@gmail.com');
+
+    expect(profile, isNotNull);
+    expect(profile!.bloodType, 'AB-');
+  });
 }

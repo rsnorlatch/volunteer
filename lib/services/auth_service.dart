@@ -36,8 +36,12 @@ class AuthService {
     await _user.insertAsync(insertedUser);
 
     await _profiles.insertAsync(
-      Profile(dto.username.trim(), dto.email.trim(), dto.role)
-          .withUserId(insertedUser.id),
+      Profile(
+        dto.username.trim(),
+        dto.email.trim(),
+        dto.role,
+        bloodType: dto.bloodType,
+      ).withUserId(insertedUser.id),
     );
 
     return Registerstatus.success;
