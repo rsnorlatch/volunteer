@@ -6,6 +6,8 @@ class Facility {
     required this.note,
     required this.distanceKm,
     required this.bloodTypes,
+    required this.latitude,
+    required this.longitude,
     this.isOpen = true,
   });
 
@@ -15,5 +17,21 @@ class Facility {
   final String note; // contoh: "Melayani donor O+"
   final double distanceKm;
   final List<String> bloodTypes;
+  final double latitude;
+  final double longitude;
   final bool isOpen;
+
+  Facility copyWith({double? distanceKm}) {
+    return Facility(
+      name: name,
+      address: address,
+      info: info,
+      note: note,
+      distanceKm: distanceKm ?? this.distanceKm,
+      bloodTypes: bloodTypes,
+      latitude: latitude,
+      longitude: longitude,
+      isOpen: isOpen,
+    );
+  }
 }

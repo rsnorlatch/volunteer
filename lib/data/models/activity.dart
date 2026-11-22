@@ -8,6 +8,8 @@ class BloodActivity {
   final String time;
   final String organizer;
   final String ownerEmail;
+  final double? latitude;
+  final double? longitude;
   final String bloodGroups;
   final String description;
   final int quota;
@@ -21,6 +23,8 @@ class BloodActivity {
     required this.time,
     required this.organizer,
     this.ownerEmail = '',
+    this.latitude,
+    this.longitude,
     required this.bloodGroups,
     required this.description,
     required this.quota,
@@ -35,6 +39,8 @@ class BloodActivity {
     String? time,
     String? organizer,
     String? ownerEmail,
+    double? latitude,
+    double? longitude,
     String? bloodGroups,
     String? description,
     int? quota,
@@ -48,6 +54,8 @@ class BloodActivity {
       time: time ?? this.time,
       organizer: organizer ?? this.organizer,
       ownerEmail: ownerEmail ?? this.ownerEmail,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       bloodGroups: bloodGroups ?? this.bloodGroups,
       description: description ?? this.description,
       quota: quota ?? this.quota,
@@ -63,6 +71,8 @@ class BloodActivity {
     required String time,
     required String organizer,
     String ownerEmail = '',
+    double? latitude,
+    double? longitude,
     required String bloodGroups,
     required String description,
     required int quota,
@@ -75,6 +85,8 @@ class BloodActivity {
         time: time,
         organizer: organizer,
         ownerEmail: ownerEmail,
+        latitude: latitude,
+        longitude: longitude,
         bloodGroups: bloodGroups,
         description: description,
         quota: quota,

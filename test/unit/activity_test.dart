@@ -55,6 +55,8 @@ void main() {
       location: "somewhere",
       organizer: "PMI",
       bloodGroups: "AB",
+      latitude: -6.9175,
+      longitude: 107.6191,
     ));
 
     expect(repo.getAll(), isNotEmpty);
@@ -113,6 +115,8 @@ void main() {
       location: "somewhere",
       organizer: "PMI",
       bloodGroups: "AB",
+      latitude: -6.9175,
+      longitude: 107.6191,
     ));
 
     await session.destroyAsync();
@@ -126,6 +130,8 @@ void main() {
 
     expect(queried, isNotNull);
     expect(queried!.registered, greaterThan(0));
+    expect(queried.latitude, -6.9175);
+    expect(queried.longitude, 107.6191);
   });
 
   test(
