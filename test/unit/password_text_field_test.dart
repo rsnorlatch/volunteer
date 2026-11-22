@@ -38,4 +38,43 @@ void main() {
         isTrue);
     expect(controller.text, 'password123');
   });
+
+  testWidgets('reset password fields toggle visibility independently',
+      (tester) async {
+    final passwordController = TextEditingController();
+    final confirmController = TextEditingController();
+    addTearDown(passwordController.dispose);
+    addTearDown(confirmController.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              PasswordTextField(
+                label: 'Password Baru',
+                hint: 'Minimal 8 karakter',
+                controller: passwordController,
+              ),
+              PasswordTextField(
+                label: 'Konfirmasi Password',
+                hint: 'Masukkan kembali password baru',
+                controller: confirmController,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextFormField).at(0), 'NewPassword123');
+    await tester.enterText(find.byType(TextFormField).at(1), 'NewPassword123');
+    await tester.tap(find.byTooltip('Tampilkan kata sandi').first);
+    await tester.pumpAndSettle();
+
+    final fields = tester.widgetList<EditableText>(find.byType(EditableText));
+    expect(fields.map((field) => field.obscureText), [false, true]);
+    expect(passwordController.text, 'NewPassword123');
+    expect(confirmController.text, 'NewPassword123');
+  });
 }

@@ -82,6 +82,21 @@ class AuthController extends GetxController {
     }
   }
 
+  /// Reset akun lokal untuk demo; implementasi produksi harus memakai
+  /// alur verifikasi penyedia autentikasi.
+  Future<String?> resetPassword({
+    required String email,
+    required String password,
+  }) async {
+    isLoading.value = true;
+    try {
+      final updated = await _auth.resetPasswordAsync(email, password);
+      return updated ? null : 'Akun dengan email tersebut tidak ditemukan.';
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> logout() async {
     await _auth.logoutAsync();
     Get.find<ProfileController>().clearSession();

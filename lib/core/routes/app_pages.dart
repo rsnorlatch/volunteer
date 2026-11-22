@@ -5,6 +5,7 @@ import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/pages/auth/login_page.dart';
+import 'package:volunteer/pages/auth/reset_password_page.dart';
 import 'package:volunteer/pages/auth/signup_page.dart';
 import 'package:volunteer/pages/donor/activity_detail_page.dart';
 import 'package:volunteer/pages/donor/facility_search_page.dart';
@@ -29,6 +30,10 @@ class AppPages {
     GetPage(name: AppRoutes.splash, page: () => const SplashPage()),
     GetPage(name: AppRoutes.login, page: () => const LoginPage()),
     GetPage(name: AppRoutes.signup, page: () => const SignUpPage()),
+    GetPage(
+      name: AppRoutes.resetPassword,
+      page: () => const ResetPasswordPage(),
+    ),
     GetPage(
       name: AppRoutes.home,
       page: () => const MainShellPage(),

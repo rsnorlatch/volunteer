@@ -62,6 +62,11 @@ class AuthService {
         : LoginStatus.incorrectCredential;
   }
 
+  Future<bool> resetPasswordAsync(String email, String newPassword) async {
+    if (email.trim().isEmpty || newPassword.isEmpty) return false;
+    return _user.resetPasswordAsync(email, newPassword);
+  }
+
   Future<void> logoutAsync() async {
     await _session.destroyAsync();
   }

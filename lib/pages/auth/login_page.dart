@@ -26,6 +26,13 @@ class _LoginPageState extends State<LoginPage> {
   final _auth = Get.find<AuthController>();
 
   @override
+  void initState() {
+    super.initState();
+    final initialEmail = Get.arguments;
+    if (initialEmail is String) _email.text = initialEmail.trim();
+  }
+
+  @override
   void dispose() {
     _email.dispose();
     _password.dispose();
@@ -98,8 +105,10 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => showAppSnack(
-                            'Fitur lupa kata sandi belum tersedia.'),
+                        onPressed: () => Get.toNamed(
+                          AppRoutes.resetPassword,
+                          arguments: _email.text.trim(),
+                        ),
                         child: const Text(
                           'Lupa kata sandi?',
                           style: TextStyle(
