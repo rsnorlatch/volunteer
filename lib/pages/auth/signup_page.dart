@@ -77,6 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 label: 'Email',
                 hint: 'nama@email.com',
                 controller: _email,
+                suffixIcon: const Icon(Icons.email_outlined),
                 keyboardType: TextInputType.emailAddress,
                 validator: Validators.email,
               ),

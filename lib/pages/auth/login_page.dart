@@ -92,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                       label: 'Email',
                       hint: 'nama@email.com',
                       controller: _email,
+                      suffixIcon: const Icon(Icons.email_outlined),
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.email,
                     ),
