@@ -5,6 +5,7 @@ import 'package:get/get_instance/src/extension_instance.dart';
 
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/user_repository/fake_user_repository.dart';
+import 'package:volunteer/adapter/session_manager/local_session_manager.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/auth_service.dart';
@@ -114,5 +115,79 @@ void main() {
 
     expect(profile, isNotNull);
     expect(profile!.userId, isNotNull);
+  });
+
+  test('when registering a donor, profile stores the selected blood type',
+      () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'achilles',
+        'achilles@gmail.com',
+        'Password123',
+        'Password123',
+        Role.donor,
+        bloodType: 'O+',
+      ),
+    );
+
+    final profile = await profiles.getByEmailAsync('achilles@gmail.com');
+
+    expect(profile, isNotNull);
+    expect(profile!.bloodType, 'O+');
+  });
+
+  test('when registering an organizer, profile stores the selected blood type',
+      () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'organizer',
+        'organizer@gmail.com',
+        'Password123',
+        'Password123',
+        Role.organizer,
+        bloodType: 'AB-',
+      ),
+    );
+
+    final profile = await profiles.getByEmailAsync('organizer@gmail.com');
+
+    expect(profile, isNotNull);
+    expect(profile!.bloodType, 'AB-');
+  });
+
+  test('reset password updates the existing account credentials', () async {
+    await service.registerAsync(
+      RegisterRequestDto(
+        'achilles',
+        'achilles@gmail.com',
+        'Password123',
+        'Password123',
+        Role.donor,
+      ),
+    );
+
+    expect(
+      await service.resetPasswordAsync(' ACHILLES@gmail.com ', 'NewPass123'),
+      isTrue,
+    );
+    final session = LocalSessionManager(profiles, users);
+    expect(
+      await session.validateAndSetCurrentUserAsync(
+          'achilles@gmail.com', 'Password123'),
+      isFalse,
+    );
+    expect(
+      await session.validateAndSetCurrentUserAsync(
+          'achilles@gmail.com', 'NewPass123'),
+      isTrue,
+    );
+  });
+
+  test('reset password does not modify an unknown account', () async {
+    expect(
+      await service.resetPasswordAsync('missing@example.com', 'NewPass123'),
+      isFalse,
+    );
+    expect(users.users, isEmpty);
   });
 }

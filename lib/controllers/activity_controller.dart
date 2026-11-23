@@ -138,7 +138,7 @@ class ActivityController extends GetxController {
     final activity = byId(activityId);
     final email = _profile.email.value.trim().toLowerCase();
     return _profile.role.value == Role.organizer &&
-        !_profile.isGuest.value &&
+        _profile.isAuthenticated.value &&
         email.isNotEmpty &&
         activity != null &&
         activity.ownerEmail.toLowerCase() == email;
@@ -154,7 +154,7 @@ class ActivityController extends GetxController {
   bool addActivity(BloodActivity a) {
     final email = _profile.email.value.trim();
     if (_profile.role.value != Role.organizer ||
-        _profile.isGuest.value ||
+        !_profile.isAuthenticated.value ||
         email.isEmpty) {
       return false;
     }

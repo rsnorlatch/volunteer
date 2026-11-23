@@ -6,12 +6,14 @@ class RegisterRequestDto {
     this.email,
     this.password,
     this.confirmPassword,
-    this.role,
-  );
+    this.role, {
+    this.bloodType = '',
+  });
 
   final String username;
   final String email;
   final String password;
   final String confirmPassword;
   final Role role;
+  final String bloodType;
 }

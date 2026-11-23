@@ -1,6 +1,9 @@
-import 'package:volunteer/entities/authentication_user.dart';
+import 'package:volunteer/entities/user.dart';
 
-// this operation is insert only because supabase does not allow you to query auth.user table
+// Implement password resets through the auth provider in production; this
+// interface is backed by an in-memory fake in the current app.
 abstract interface class UserRepositoryInterface {
-  Future<void> insertAsync(AuthenticationUser user);
+  Future<void> insertAsync(User user);
+
+  Future<bool> resetPasswordAsync(String email, String newPassword);
 }
