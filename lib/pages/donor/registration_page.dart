@@ -28,8 +28,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _profile = Get.find<ProfileController>();
 
   late final BloodActivity? _activity = _ctrl.byId(Get.arguments as String);
-  late final TextEditingController _name = TextEditingController(
-      text: _profile.isGuest.value ? '' : _profile.name.value);
+  late final TextEditingController _name =
+      TextEditingController(text: _profile.name.value);
   late final TextEditingController _phone =
       TextEditingController(text: _profile.phone.value);
 

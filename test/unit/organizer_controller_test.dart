@@ -22,7 +22,7 @@ void main() {
     profile.name.value = 'Organizer One';
     profile.email.value = 'organizer@example.com';
     profile.role.value = Role.organizer;
-    profile.isGuest.value = false;
+    profile.isAuthenticated.value = true;
   });
 
   tearDown(() {
@@ -62,18 +62,33 @@ void main() {
 
   test('organizer routes reject guests and donor accounts', () {
     final middleware = OrganizerOnlyMiddleware();
-    profile.isGuest.value = true;
+    profile.isAuthenticated.value = false;
 
     expect(
         middleware.redirect(AppRoutes.manageActivities)?.name, AppRoutes.login);
 
-    profile.isGuest.value = false;
-        profile.role.value = Role.donor;
+    profile.isAuthenticated.value = true;
+    profile.role.value = Role.donor;
     expect(
         middleware.redirect(AppRoutes.manageActivities)?.name, AppRoutes.home);
 
     profile.role.value = Role.organizer;
     expect(middleware.redirect(AppRoutes.manageActivities), isNull);
+  });
+
+  test('donor routes require a signed-in donor account', () {
+    final middleware = DonorOnlyMiddleware();
+
+    profile.isAuthenticated.value = false;
+    expect(middleware.redirect(AppRoutes.home)?.name, AppRoutes.login);
+
+    profile.isAuthenticated.value = true;
+    profile.role.value = Role.organizer;
+    expect(middleware.redirect(AppRoutes.home)?.name,
+        AppRoutes.organizerDashboard);
+
+    profile.role.value = Role.donor;
+    expect(middleware.redirect(AppRoutes.home), isNull);
   });
 
   test('organizer cannot edit or delete another account activity', () {

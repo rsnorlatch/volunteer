@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
@@ -7,6 +8,7 @@ import 'package:volunteer/core/constants/app_constants.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/pages/organizer/activity_coordinate_picker_map.dart';
 import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
@@ -32,7 +34,10 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
 
   final _title = TextEditingController();
   final _location = TextEditingController();
+  final _latitude = TextEditingController();
+  final _longitude = TextEditingController();
   final _quota = TextEditingController();
+  late final Listenable _coordinateInputs;
 
   BloodActivity? _existing;
   DateTime? _date;
@@ -47,12 +52,15 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   @override
   void initState() {
     super.initState();
+    _coordinateInputs = Listenable.merge([_latitude, _longitude]);
     if (widget.isEdit) {
       final a = _ctrl.byId(Get.arguments as String);
       _existing = a != null && _ctrl.canManageActivity(a.id) ? a : null;
       if (a != null) {
         _title.text = a.title;
         _location.text = a.location;
+        _latitude.text = a.latitude?.toString() ?? '';
+        _longitude.text = a.longitude?.toString() ?? '';
         _date = DateTime.tryParse(a.date);
         final parts = a.time.split('-');
         if (parts.length == 2) {
@@ -70,6 +78,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   void dispose() {
     _title.dispose();
     _location.dispose();
+    _latitude.dispose();
+    _longitude.dispose();
     _quota.dispose();
     super.dispose();
   }
@@ -152,6 +162,39 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     });
   }
 
+  double? _coordinateValue(String value) =>
+      double.tryParse(value.trim().replaceAll(',', '.'));
+
+  String? _validateCoordinate(
+    String? value, {
+    required String label,
+    required double minimum,
+    required double maximum,
+  }) {
+    final coordinate = _coordinateValue(value ?? '');
+    if (coordinate == null) return '$label wajib diisi dengan angka.';
+    if (!coordinate.isFinite || coordinate < minimum || coordinate > maximum) {
+      return '$label harus antara $minimum dan $maximum.';
+    }
+    return null;
+  }
+
+  LatLng? _coordinatePoint() {
+    final latitude = _coordinateValue(_latitude.text);
+    final longitude = _coordinateValue(_longitude.text);
+    if (latitude == null ||
+        longitude == null ||
+        !latitude.isFinite ||
+        !longitude.isFinite ||
+        latitude < -90 ||
+        latitude > 90 ||
+        longitude < -180 ||
+        longitude > 180) {
+      return null;
+    }
+    return LatLng(latitude, longitude);
+  }
+
   void _submit() {
     final formOk = _formKey.currentState!.validate();
 
@@ -188,6 +231,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       final updated = _ctrl.updateActivity(_existing!.copyWith(
         title: _title.text.trim(),
         location: _location.text.trim(),
+        latitude: _coordinateValue(_latitude.text),
+        longitude: _coordinateValue(_longitude.text),
         date: date,
         time: time,
         bloodGroups: groups,
@@ -206,6 +251,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         date: date,
         time: time,
         organizer: _profile.name.value,
+        latitude: _coordinateValue(_latitude.text),
+        longitude: _coordinateValue(_longitude.text),
         bloodGroups: groups,
         description: '',
         quota: quota,
@@ -262,6 +309,65 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
                     Validators.required(v, edit ? 'Alamat' : 'Lokasi'),
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Titik lokasi kegiatan',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Ketuk peta untuk memilih titik lokasi.',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 10),
+              AnimatedBuilder(
+                animation: _coordinateInputs,
+                builder: (context, _) => ActivityCoordinatePickerMap(
+                  selectedLocation: _coordinatePoint(),
+                  onLocationSelected: (location) {
+                    _latitude.text = location.latitude.toStringAsFixed(6);
+                    _longitude.text = location.longitude.toStringAsFixed(6);
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                label: 'Garis lintang',
+                hint: 'Contoh: -6.9175',
+                controller: _latitude,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                validator: (value) => _validateCoordinate(
+                  value,
+                  label: 'Garis lintang',
+                  minimum: -90,
+                  maximum: 90,
+                ),
+              ),
+              const SizedBox(height: 16),
+              CustomTextField(
+                label: 'Garis bujur',
+                hint: 'Contoh: 107.6191',
+                controller: _longitude,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                  signed: true,
+                ),
+                validator: (value) => _validateCoordinate(
+                  value,
+                  label: 'Garis bujur',
+                  minimum: -180,
+                  maximum: 180,
+                ),
+              ),
               if (edit) ...[
                 PickerField(
                   label: 'Waktu mulai',

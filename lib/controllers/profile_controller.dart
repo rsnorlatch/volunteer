@@ -1,21 +1,27 @@
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:volunteer/entities/profile.dart';
 import 'package:volunteer/entities/role.dart';
+import 'package:volunteer/services/profile_photo_service.dart';
 
 class ProfileController extends GetxController {
+  ProfileController({ProfilePhotoService? photoService})
+      : _photoService = photoService ?? ProfilePhotoService();
+
+  final ProfilePhotoService _photoService;
   final name = 'Sahabat Donor'.obs;
   final email = ''.obs;
+  final avatarPath = RxnString();
+  final isPhotoLoading = false.obs;
   final phone = ''.obs;
   final bloodType = ''.obs;
   final medicalNotes = ''.obs;
   final role = Role.donor.obs;
-  final isGuest = true.obs;
+  final isAuthenticated = false.obs;
   final joinedYear = DateTime.now().year;
 
-  String get userKey => (isGuest.value || email.value.isEmpty)
-      ? 'guest'
-      : email.value.toLowerCase();
+  String get userKey => email.value.toLowerCase();
 
   String get initial {
     final n = name.value.trim();
@@ -25,21 +31,23 @@ class ProfileController extends GetxController {
   void setFromProfile(Profile p) {
     name.value = p.username;
     email.value = p.email;
+    avatarPath.value = null;
     role.value = p.role;
     phone.value = '';
-    bloodType.value = '';
+    bloodType.value = p.bloodType;
     medicalNotes.value = '';
-    isGuest.value = false;
+    isAuthenticated.value = true;
   }
 
-  void setGuest() {
-    name.value = 'Sahabat Donor';
+  void clearSession() {
+    name.value = '';
     email.value = '';
+    avatarPath.value = null;
     phone.value = '';
     bloodType.value = '';
     medicalNotes.value = '';
     role.value = Role.donor;
-    isGuest.value = true;
+    isAuthenticated.value = false;
   }
 
   void updateProfile({
@@ -52,5 +60,47 @@ class ProfileController extends GetxController {
     this.phone.value = phone;
     this.bloodType.value = bloodType;
     medicalNotes.value = notes;
+  }
+
+  Future<void> loadProfilePhoto() async {
+    final accountEmail = email.value;
+    final path = await _photoService.loadPath(accountEmail);
+    if (email.value.toLowerCase() == accountEmail.toLowerCase()) {
+      avatarPath.value = path;
+    }
+  }
+
+  Future<bool> updateProfilePhoto(ImageSource source) async {
+    if (isPhotoLoading.value) return false;
+    isPhotoLoading.value = true;
+    try {
+      final path = await _photoService.pickAndSave(email.value, source);
+      if (path == null) return false;
+      avatarPath.value = path;
+      return true;
+    } finally {
+      isPhotoLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProfilePhotoFromFile() async {
+    if (isPhotoLoading.value) return false;
+    isPhotoLoading.value = true;
+    try {
+      final path = await _photoService.pickFileAndSave(email.value);
+      if (path == null) return false;
+      avatarPath.value = path;
+      return true;
+    } finally {
+      isPhotoLoading.value = false;
+    }
+  }
+
+  Future<void> removeProfilePhoto() async {
+    final accountEmail = email.value;
+    await _photoService.remove(accountEmail);
+    if (email.value.toLowerCase() == accountEmail.toLowerCase()) {
+      avatarPath.value = null;
+    }
   }
 }

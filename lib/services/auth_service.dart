@@ -36,8 +36,12 @@ class AuthService {
     await _user.insertAsync(insertedUser);
 
     await _profiles.insertAsync(
-      Profile(dto.username.trim(), dto.email.trim(), dto.role)
-          .withUserId(insertedUser.id),
+      Profile(
+        dto.username.trim(),
+        dto.email.trim(),
+        dto.role,
+        bloodType: dto.bloodType,
+      ).withUserId(insertedUser.id),
     );
 
     return Registerstatus.success;
@@ -56,6 +60,11 @@ class AuthService {
     return correctCredential
         ? LoginStatus.success
         : LoginStatus.incorrectCredential;
+  }
+
+  Future<bool> resetPasswordAsync(String email, String newPassword) async {
+    if (email.trim().isEmpty || newPassword.isEmpty) return false;
+    return _user.resetPasswordAsync(email, newPassword);
   }
 
   Future<void> logoutAsync() async {

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
@@ -11,10 +14,121 @@ import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
+import 'package:volunteer/shared/widgets/profile_photo_image.dart';
 import 'package:volunteer/shared/widgets/sub_page_scaffold.dart';
+import 'package:volunteer/services/profile_photo_errors.dart';
 
-class ProfilePage extends StatelessWidget {
+enum _ProfilePhotoAction { gallery, file, camera, remove }
+
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _profile = Get.find<ProfileController>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await _profile.loadProfilePhoto();
+      } on PlatformException {
+        if (mounted) {
+          showAppSnack('Penyimpanan foto tidak dapat diakses.', error: true);
+        }
+      } on ProfilePhotoStorageException catch (error) {
+        if (mounted) showAppSnack(error.message, error: true);
+      }
+    });
+  }
+
+  Future<void> _changePhoto(
+    BuildContext context,
+    ProfileController profile,
+  ) async {
+    if (profile.isPhotoLoading.value) return;
+    final supportsCamera = !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+    final action = await showModalBottomSheet<_ProfilePhotoAction>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            const ListTile(
+              title: Text(
+                'Foto profil',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Pilih dari galeri'),
+              onTap: () => Navigator.pop(context, _ProfilePhotoAction.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder_open_outlined),
+              title: const Text('Pilih file gambar'),
+              onTap: () => Navigator.pop(context, _ProfilePhotoAction.file),
+            ),
+            if (supportsCamera)
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: const Text('Ambil foto'),
+                onTap: () => Navigator.pop(context, _ProfilePhotoAction.camera),
+              ),
+            if (profile.avatarPath.value != null)
+              ListTile(
+                leading:
+                    const Icon(Icons.delete_outline, color: AppColors.danger),
+                title: const Text('Hapus foto'),
+                onTap: () => Navigator.pop(context, _ProfilePhotoAction.remove),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (!context.mounted) return;
+    if (action == null) return;
+    if (action == _ProfilePhotoAction.remove) {
+      try {
+        await profile.removeProfilePhoto();
+        showAppSnack('Foto profil dihapus.');
+      } on PlatformException {
+        showAppSnack('Penyimpanan foto tidak dapat diakses.', error: true);
+      } on ProfilePhotoStorageException catch (error) {
+        showAppSnack(error.message, error: true);
+      }
+      return;
+    }
+
+    try {
+      final updated = action == _ProfilePhotoAction.file
+          ? await profile.updateProfilePhotoFromFile()
+          : await profile.updateProfilePhoto(
+              action == _ProfilePhotoAction.camera
+                  ? ImageSource.camera
+                  : ImageSource.gallery,
+            );
+      if (updated && context.mounted) {
+        showAppSnack('Foto profil berhasil diperbarui.', success: true);
+      }
+    } on PlatformException {
+      showAppSnack(
+        action == _ProfilePhotoAction.camera
+            ? 'Kamera tidak tersedia atau izinnya ditolak.'
+            : 'Pemilih gambar tidak dapat dibuka.',
+        error: true,
+      );
+    } on ProfilePhotoStorageException catch (error) {
+      showAppSnack(error.message, error: true);
+    }
+  }
 
   Future<void> _confirmLogout() async {
     final ok = await Get.dialog<bool>(
@@ -52,7 +166,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profile = Get.find<ProfileController>();
+    final profile = _profile;
     final act = Get.find<ActivityController>();
 
     return Scaffold(
@@ -81,20 +195,67 @@ class ProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.all(20),
                   child: Row(
                     children: [
-                      Container(
-                        width: 76,
-                        height: 76,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryLight,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(profile.initial,
-                            style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primaryColor)),
-                      ),
+                      Obx(() {
+                        final photoPath = profile.avatarPath.value;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            GestureDetector(
+                              onTap: () => _changePhoto(context, profile),
+                              child: Container(
+                                width: 76,
+                                height: 76,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  shape: BoxShape.circle,
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: photoPath == null
+                                    ? Text(profile.initial,
+                                        style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.primaryColor))
+                                    : profilePhotoImage(
+                                        photoPath,
+                                        fallback: Text(
+                                          profile.initial,
+                                          style: const TextStyle(
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.primaryColor,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                            ),
+                            Positioned(
+                              right: -2,
+                              bottom: -2,
+                              child: Obx(
+                                () => CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: Colors.white,
+                                  child: profile.isPhotoLoading.value
+                                      ? const SizedBox(
+                                          width: 14,
+                                          height: 14,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(
+                                          Icons.camera_alt,
+                                          size: 16,
+                                          color: AppColors.primaryColor,
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
                       const SizedBox(width: 18),
                       Expanded(
                         child: Column(
@@ -109,24 +270,18 @@ class ProfilePage extends StatelessWidget {
                                     color: AppColors.textPrimary)),
                             const SizedBox(height: 6),
                             Text(
-                              profile.isGuest.value
-                                  ? 'Pendonor • Mode tamu'
-                                  : profile.role.value == Role.organizer
-                                      ? 'Penyelenggara • Bergabung ${profile.joinedYear}'
-                                      : 'Pendonor • Bergabung ${profile.joinedYear}',
+                              profile.role.value == Role.organizer
+                                  ? 'Penyelenggara • Bergabung ${profile.joinedYear}'
+                                  : 'Pendonor • Bergabung ${profile.joinedYear}',
                               style: const TextStyle(
                                   fontSize: 11, color: AppColors.textSecondary),
                             ),
                             const SizedBox(height: 10),
                             StatusPill(
-                              profile.isGuest.value
-                                  ? 'Tamu'
-                                  : profile.role.value == Role.organizer
-                                      ? 'Penyelenggara aktif'
-                                      : 'Pendonor aktif',
-                              tone: profile.isGuest.value
-                                  ? PillTone.neutral
-                                  : PillTone.success,
+                              profile.role.value == Role.organizer
+                                  ? 'Penyelenggara aktif'
+                                  : 'Pendonor aktif',
+                              tone: PillTone.success,
                             ),
                           ],
                         ),

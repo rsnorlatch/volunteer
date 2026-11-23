@@ -9,6 +9,7 @@ import 'package:volunteer/pages/auth/auth_controller.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/custom_text_field.dart';
+import 'package:volunteer/shared/widgets/password_text_field.dart';
 import 'package:volunteer/shared/widgets/primary_button.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,6 +24,13 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _auth = Get.find<AuthController>();
+
+  @override
+  void initState() {
+    super.initState();
+    final initialEmail = Get.arguments;
+    if (initialEmail is String) _email.text = initialEmail.trim();
+  }
 
   @override
   void dispose() {
@@ -42,11 +50,6 @@ class _LoginPageState extends State<LoginPage> {
         Get.find<ProfileController>().role.value == Role.organizer;
     Get.offAllNamed(
         isOrganizer ? AppRoutes.organizerDashboard : AppRoutes.home);
-  }
-
-  void _continueAsGuest() {
-    Get.find<ProfileController>().setGuest();
-    Get.offAllNamed(AppRoutes.home);
   }
 
   @override
@@ -89,22 +92,24 @@ class _LoginPageState extends State<LoginPage> {
                       label: 'Email',
                       hint: 'nama@email.com',
                       controller: _email,
+                      suffixIcon: const Icon(Icons.email_outlined),
                       keyboardType: TextInputType.emailAddress,
                       validator: Validators.email,
                     ),
                     const SizedBox(height: 16),
-                    CustomTextField(
+                    PasswordTextField(
                       label: 'Kata sandi',
                       hint: 'Masukkan kata sandi',
                       controller: _password,
-                      obscureText: true,
                       validator: (v) => Validators.required(v, 'Kata sandi'),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => showAppSnack(
-                            'Fitur lupa kata sandi belum tersedia.'),
+                        onPressed: () => Get.toNamed(
+                          AppRoutes.resetPassword,
+                          arguments: _email.text.trim(),
+                        ),
                         child: const Text(
                           'Lupa kata sandi?',
                           style: TextStyle(
@@ -121,33 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                           isLoading: _auth.isLoading.value,
                           onPressed: _login,
                         )),
-                    const SizedBox(height: 16),
-                    const Center(
-                      child: Text('atau',
-                          style: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12)),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: _continueAsGuest,
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: AppColors.surface,
-                          foregroundColor: AppColors.textPrimary,
-                          side: const BorderSide(color: AppColors.border),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          'Lanjutkan sebagai pendonor',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 14),
-                        ),
-                      ),
-                    ),
                     const SizedBox(height: 28),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -30,6 +30,8 @@ class ActivityService {
       return;
     }
 
-    await repository.updateAsync(activity.copyWith(registered: activity.registered + 1));
+    await repository.updateAsync(
+      activity.copyWith(registered: activity.registered + 1),
+    );
   }
 }
