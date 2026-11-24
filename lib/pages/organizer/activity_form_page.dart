@@ -8,6 +8,8 @@ import 'package:volunteer/core/constants/app_constants.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/core/utils/validators.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_mapper.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/pages/organizer/activity_coordinate_picker_map.dart';
 import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
@@ -39,7 +41,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
   final _quota = TextEditingController();
   late final Listenable _coordinateInputs;
 
-  BloodActivity? _existing;
+  BloodActivityModel? _existing;
   DateTime? _date;
   TimeOfDay? _start;
   TimeOfDay? _end;
@@ -57,19 +59,20 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       final a = _ctrl.byId(Get.arguments as String);
       _existing = a != null && _ctrl.canManageActivity(a.id) ? a : null;
       if (a != null) {
-        _title.text = a.title;
-        _location.text = a.location;
-        _latitude.text = a.latitude?.toString() ?? '';
-        _longitude.text = a.longitude?.toString() ?? '';
-        _date = DateTime.tryParse(a.date);
-        final parts = a.time.split('-');
+        final entity = a.toEntity();
+        _title.text = entity.title;
+        _location.text = entity.location;
+        _latitude.text = entity.latitude?.toString() ?? '';
+        _longitude.text = entity.longitude?.toString() ?? '';
+        _date = DateTime.tryParse(entity.date);
+        final parts = entity.time.split('-');
         if (parts.length == 2) {
           _start = Fmt.parseTime(parts[0]);
           _end = Fmt.parseTime(parts[1]);
         }
-        _groups.addAll(Fmt.acceptsAll(a.bloodGroups)
+        _groups.addAll(Fmt.acceptsAll(entity.bloodGroups)
             ? AppConstants.bloodTypes
-            : Fmt.groups(a.bloodGroups));
+            : Fmt.groups(entity.bloodGroups));
       }
     }
   }
@@ -228,15 +231,23 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     final time = '${Fmt.hhmm(_start!)} - ${Fmt.hhmm(_end!)}';
 
     if (widget.isEdit && _existing != null) {
-      final updated = _ctrl.updateActivity(_existing!.copyWith(
+      final existing = _existing!;
+      final activity = BloodActivity(
+        id: existing.id,
         title: _title.text.trim(),
         location: _location.text.trim(),
-        latitude: _coordinateValue(_latitude.text),
-        longitude: _coordinateValue(_longitude.text),
         date: date,
         time: time,
+        organizer: existing.organizer,
+        ownerEmail: existing.ownerEmail,
+        latitude: _coordinateValue(_latitude.text),
+        longitude: _coordinateValue(_longitude.text),
         bloodGroups: groups,
-      ));
+        description: existing.description,
+        quota: existing.quota,
+        registered: existing.registered,
+      );
+      final updated = _ctrl.updateActivity(activity.toModel());
       if (!updated) {
         showAppSnack('Kegiatan tidak dapat diperbarui.', error: true);
         return;
@@ -245,7 +256,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
       showAppSnack('Kegiatan berhasil diperbarui.');
     } else {
       final quota = int.parse(_quota.text.replaceAll(RegExp(r'[^0-9]'), ''));
-      final created = _ctrl.addActivity(BloodActivity.create(
+      final activity = BloodActivity.create(
         title: _title.text.trim(),
         location: _location.text.trim(),
         date: date,
@@ -256,7 +267,8 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         bloodGroups: groups,
         description: '',
         quota: quota,
-      ));
+      );
+      final created = _ctrl.addActivity(activity.toModel());
       if (!created) {
         showAppSnack('Hanya penyelenggara yang dapat membuat kegiatan.',
             error: true);

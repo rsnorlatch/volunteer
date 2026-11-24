@@ -21,19 +21,19 @@ import 'package:volunteer/services/auth_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load();
+  await dotenv.load(fileName: "config.env");
 
   await Supabase.initialize(
       url: dotenv.get("SUPABASE_URL"),
       publishableKey: dotenv.get("PUBLISHABLE_KEY"));
 
-  // final profiles = SupabaseProfileRepository();
-  // final users = SupabaseUserRepository();
-  // final session = SupabaseSessionManager(profiles);
+  final profiles = SupabaseProfileRepository();
+  final users = SupabaseUserRepository();
+  final session = SupabaseSessionManager(profiles);
 
-  final profiles = FakeProfileRepository();
-  final users = FakeUserRepository();
-  final session = LocalSessionManager(profiles, users);
+  // final profiles = FakeProfileRepository();
+  // final users = FakeUserRepository();
+  // final session = LocalSessionManager(profiles, users);
 
   Get.put<ProfileRepositoryInterface>(profiles, permanent: true);
   Get.put<SessionManagerInterface>(session, permanent: true);

@@ -6,4 +6,6 @@ abstract interface class SessionManagerInterface {
   Future<void> destroyAsync();
 
   Future<Profile?> getCurrentProfileAsync();
+
+  Future<String?> getCurrentUserIdAsync();
 }

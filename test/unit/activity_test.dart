@@ -5,12 +5,12 @@ import 'package:volunteer/adapter/activity_repository/fake_activity_repository.d
 import 'package:volunteer/adapter/profile_repository/fake_profile_repository.dart';
 import 'package:volunteer/adapter/session_manager/fake_session_manager.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_mapper.dart';
 import 'package:volunteer/entities/profile.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/services/activity_service.dart';
 import 'package:volunteer/services/fake_activity_service_binding.dart';
 
-// TODO: implement a better model for BloodActivity to separate the display model and the domain model
 void main() {
   late ActivityService service;
   late FakeSessionManager session;
@@ -57,7 +57,7 @@ void main() {
       bloodGroups: "AB",
       latitude: -6.9175,
       longitude: 107.6191,
-    ));
+    ).toModel());
 
     expect(repo.getAll(), isNotEmpty);
   });
@@ -74,7 +74,7 @@ void main() {
       location: "somewhere",
       organizer: "PMI",
       bloodGroups: "AB",
-    ));
+    ).toModel());
 
     expect(repo.getAll(), isEmpty);
   });
@@ -94,7 +94,7 @@ void main() {
       location: "somewhere",
       organizer: "PMI",
       bloodGroups: "AB",
-    ));
+    ).toModel());
 
     expect(repo.getAll(), isEmpty);
   });
@@ -117,14 +117,14 @@ void main() {
       bloodGroups: "AB",
       latitude: -6.9175,
       longitude: 107.6191,
-    ));
+    ).toModel());
 
     await session.destroyAsync();
 
     await session.validateAndSetCurrentUserAsync(
         "achilles@gmail.com", "Password123");
 
-    await service.applyAsync(activityId);
+    await service.applyAsync(activityId, "0837387382");
 
     final queried = await repo.getByIdAsync(activityId);
 
@@ -152,11 +152,11 @@ void main() {
       location: "somewhere",
       organizer: "PMI",
       bloodGroups: "AB",
-    ));
+    ).toModel());
 
     await session.destroyAsync();
 
-    await service.applyAsync(activityId);
+    await service.applyAsync(activityId, "0837387382");
 
     final queried = await repo.getByIdAsync(activityId);
 
@@ -165,12 +165,7 @@ void main() {
   });
 
   test(
-      "when an activity is held at 9.00 - 12.00, when currently it is 13.00 should not be able to apply",
-      () async {},
-      skip: true);
-
-  test(
-      "when an activity is held at 2026-11-12 but today is 2026-11-13 should not be able apply",
+      "when an activity is held at 9.00 - 12.00, when currently it is 13.00 should not be visible in the activity list",
       () async {},
       skip: true);
 }

@@ -1,23 +1,23 @@
-import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 
 class FakeActivityRepository {
-  final List<BloodActivity> _activites = [];
+  final List<BloodActivityModel> _activites = [];
 
-  List<BloodActivity> getAll() {
+  List<BloodActivityModel> getAll() {
     return _activites;
   }
 
-  Future<void> insertAsync(BloodActivity activity) async {
+  Future<void> insertAsync(BloodActivityModel activity) async {
     _activites.add(activity);
   }
 
-  Future<BloodActivity?> getByIdAsync(String activityId) async {
+  Future<BloodActivityModel?> getByIdAsync(String activityId) async {
     return _activites
         .where((activity) => activity.id == activityId)
         .firstOrNull;
   }
 
-  Future<void> updateAsync(BloodActivity newActivity) async {
+  Future<void> updateAsync(BloodActivityModel newActivity) async {
     for (int i = 0; i <= _activites.length; i++) {
       if (_activites[i].id == newActivity.id) {
         _activites[i] = newActivity;

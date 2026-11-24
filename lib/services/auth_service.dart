@@ -33,7 +33,10 @@ class AuthService {
 
     final insertedUser =
         AuthenticationUser(dto.username.trim(), dto.email.trim(), dto.password);
+
     await _user.insertAsync(insertedUser);
+
+    final currentUserId = await _session.getCurrentUserIdAsync();
 
     await _profiles.insertAsync(
       Profile(
@@ -41,7 +44,7 @@ class AuthService {
         dto.email.trim(),
         dto.role,
         bloodType: dto.bloodType,
-      ).withUserId(insertedUser.id),
+      ).withUserId(currentUserId!),
     );
 
     return Registerstatus.success;

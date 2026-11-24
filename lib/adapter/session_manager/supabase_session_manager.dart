@@ -16,9 +16,9 @@ class SupabaseSessionManager implements SessionManagerInterface {
 
   @override
   Future<Profile?> getCurrentProfileAsync() async {
-    final currentUser = await client.auth.getSession();
+    final currentUser = client.auth.currentUser;
 
-    return await profile.getByEmailAsync(currentUser!.user.email!);
+    return await profile.getByEmailAsync(currentUser!.email!);
   }
 
   @override
@@ -29,13 +29,19 @@ class SupabaseSessionManager implements SessionManagerInterface {
 
       return true;
     } on AuthException catch (e) {
-      if ((e as String).contains("Invalid login credentials")) {
-        return false;
-      }
-
-      throw Exception("auth exception catched: $e");
+      print("auth Exception: $e");
+      return false;
     } catch (e) {
       throw Exception("failed to authenticate: $e");
     }
+  }
+
+  @override
+  Future<String?> getCurrentUserIdAsync() async {
+    if (client.auth.currentUser == null) {
+      return null;
+    }
+
+    return client.auth.currentUser!.id;
   }
 }

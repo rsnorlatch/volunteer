@@ -5,7 +5,7 @@ import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/formatters.dart';
-import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
@@ -25,7 +25,7 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
   final _profile = Get.find<ProfileController>();
   String? _selectedId;
 
-  Future<void> _confirmDelete(BloodActivity a) async {
+  Future<void> _confirmDelete(BloodActivityModel a) async {
     final ok = await Get.dialog<bool>(
       AlertDialog(
         title: const Text('Hapus kegiatan?'),

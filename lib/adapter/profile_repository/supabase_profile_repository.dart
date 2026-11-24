@@ -32,9 +32,11 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
       return null;
     }
 
-    return Profile(queried["fullname"], queried["email"], queried["role"])
-        .withId(queried["id"])
-        .withUserId(queried["user_id"]);
+    return Profile(
+      queried["fullname"],
+      queried["email"],
+      queried["role"] == "donor" ? Role.donor : Role.organizer,
+    ).withId(queried["id"]).withUserId(queried["user_id"]);
   }
 
   @override
@@ -42,7 +44,7 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
     final queried = await client
         .from("profiles")
         .select("*")
-        .eq("username", username)
+        .eq("fullname", username)
         .maybeSingle();
 
     if (queried == null) {
@@ -59,9 +61,9 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
     try {
       await client.from("profiles").insert({
         "fullname": profile.username,
-        "username": profile.username,
         "email": profile.email,
         "role": profile.role.toString(),
+        "bloodtype": profile.bloodType,
         "user_id": profile.userId,
       });
     } catch (e) {
