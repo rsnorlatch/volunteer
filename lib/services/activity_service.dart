@@ -83,4 +83,19 @@ class ActivityService {
       donorName: currentRegistration.donorName,
     ));
   }
+
+  Future<void> markAsPendingAsync(String registrationId) async {
+    final currentRegistration = await registration.getByIdAsync(registrationId);
+
+    await registration.updateAsync(Registration(
+      id: registrationId,
+      phone: currentRegistration!.phone,
+      userKey: currentRegistration.userKey,
+      createdAt: currentRegistration.createdAt,
+      status: RegistrationStatus.pending,
+      activityId: currentRegistration.activityId,
+      bloodType: currentRegistration.bloodType,
+      donorName: currentRegistration.donorName,
+    ));
+  }
 }
