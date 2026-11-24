@@ -54,7 +54,7 @@ class ActivityService {
     ));
   }
 
-  Future<void> acceptRegistration(String registrationId) async {
+  Future<void> acceptRegistrationAsync(String registrationId) async {
     final currentRegistration = await registration.getByIdAsync(registrationId);
 
     await registration.updateAsync(Registration(
@@ -69,7 +69,7 @@ class ActivityService {
     ));
   }
 
-  Future<void> rejectRegistration(String registrationId) async {
+  Future<void> rejectRegistrationAsync(String registrationId) async {
     final currentRegistration = await registration.getByIdAsync(registrationId);
 
     await registration.updateAsync(Registration(
