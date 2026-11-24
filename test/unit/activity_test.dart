@@ -230,8 +230,40 @@ void main() {
   );
 
   test("if someone apply for an activity, an organizer can reject it",
-      () async {},
-      skip: true);
+      () async {
+    final activityId = Uuid().v4();
+
+    await session.validateAndSetCurrentUserAsync(
+        "tortoise@gmail.com", "Password123");
+
+    await service.createActivityAsync(BloodActivity.create(
+      id: activityId,
+      title: "activity 1",
+      description: "activity 1",
+      date: "2026-11-12",
+      time: "09.00 - 12.00",
+      quota: 100,
+      location: "somewhere",
+      organizer: "PMI",
+      bloodGroups: "AB",
+    ).toModel());
+
+    await session.destroyAsync();
+
+    await session.validateAndSetCurrentUserAsync(
+        "achilless@gmail.com", "Password123");
+
+    await service.applyAsync(activityId, "0838838124");
+
+    final latestRegistration = (await registration.getAll()).last;
+
+    await service.rejectRegistration(latestRegistration.id);
+
+    final acceptedRegistration =
+        await registration.getByIdAsync(latestRegistration.id);
+
+    expect(acceptedRegistration!.status, RegistrationStatus.rejected);
+  });
 
   test("someone that is either accepted or rejected can be marked as pending",
       () async {},
