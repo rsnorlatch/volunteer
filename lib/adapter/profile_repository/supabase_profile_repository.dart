@@ -62,7 +62,7 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
       await client.from("profiles").insert({
         "fullname": profile.username,
         "email": profile.email,
-        "role": profile.role.toString(),
+        "role": profile.role == Role.donor ? "donor" : "organizer",
         "bloodtype": profile.bloodType,
         "user_id": profile.userId,
       });

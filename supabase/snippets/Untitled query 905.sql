@@ -1,1 +1,1 @@
-GRANT SELECT ON public.profiles TO authenticated;
+GRANT INSERT ON public.profiles TO anon;

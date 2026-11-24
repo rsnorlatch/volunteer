@@ -236,7 +236,7 @@ class ActivityController extends GetxController {
       '09:00 - 12:00',
     );
 
-    activities.assignAll([
+    final toBeInsertedActivities = [
       BloodActivityModel(
         id: 'act-1',
         title: 'Donor Darah Peduli Sesama',
@@ -287,7 +287,9 @@ class ActivityController extends GetxController {
         quota: 150,
         registered: 1,
       ),
-    ]);
+    ];
+
+    activities.assignAll(toBeInsertedActivities);
 
     Registration r(String id, String act, String name, String blood,
             RegistrationStatus s, int daysAgo) =>
