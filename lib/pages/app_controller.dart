@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../data/models/activity.dart';
+import '../data/models/activity_model.dart';
 
 class AppController extends GetxController {
   final isLoading = false.obs;
@@ -8,40 +8,40 @@ class AppController extends GetxController {
   final email = ''.obs;
   final bloodType = 'O+'.obs;
 
-  final activities = <BloodActivity>[
-    const BloodActivity(
+  final activities = <BloodActivityModel>[
+    BloodActivityModel(
       id: 'demo-1',
       title: 'Donor Darah Peduli Sesama',
       location: 'Mall Malioboro, Yogyakarta',
-      date: '2026-12-05',
-      time: '09:00 - 14:00',
+      startDateTime: DateTime(2026, 12, 5, 9, 0),
+      endDateTime: DateTime(2026, 12, 5, 14, 0),
       organizer: 'PMI Yogyakarta',
-      bloodGroups: 'A+, B+, O+, AB+',
+      bloodGroups: BloodActivityModel.bloodGroupsFromString('A+, B+, O+, AB+'),
       description:
           'Mari berbagi kehidupan melalui donor darah. Setetes darah Anda sangat berarti.',
       quota: 100,
       registered: 64,
     ),
-    const BloodActivity(
+    BloodActivityModel(
       id: 'demo-2',
       title: 'Aksi Donor Darah Kampus',
       location: 'Universitas Gadjah Mada',
-      date: '2026-12-12',
-      time: '08:00 - 12:00',
+      startDateTime: DateTime(2026, 12, 12, 8, 0),
+      endDateTime: DateTime(2026, 12, 12, 12, 0),
       organizer: 'Volunteer Campus',
-      bloodGroups: 'Semua golongan',
+      bloodGroups: BloodActivityModel.bloodGroupsFromString('Semua golongan'),
       description: 'Kegiatan donor darah terbuka untuk masyarakat umum.',
       quota: 80,
       registered: 32,
     ),
-    const BloodActivity(
+    BloodActivityModel(
       id: 'demo-3',
       title: 'Sehat Bersama, Donor Bersama',
       location: 'Jogja City Mall',
-      date: '2026-12-20',
-      time: '10:00 - 15:00',
+      startDateTime: DateTime(2026, 12, 20, 10, 0),
+      endDateTime: DateTime(2026, 12, 20, 15, 0),
       organizer: 'PMI Kota Yogyakarta',
-      bloodGroups: 'O+, O-, A+',
+      bloodGroups: BloodActivityModel.bloodGroupsFromString('O+, O-, A+'),
       description: 'Donor darah rutin untuk memenuhi kebutuhan stok darah.',
       quota: 120,
       registered: 48,
@@ -184,14 +184,15 @@ class AppController extends GetxController {
     required String description,
     required int quota,
   }) {
-    final activity = BloodActivity(
+    final range = BloodActivityModel.dateTimeRangeFromString(date, time);
+    final activity = BloodActivityModel(
       id: id ?? 'local-${DateTime.now().microsecondsSinceEpoch}',
       title: title,
       location: location,
-      date: date,
-      time: time,
+      startDateTime: range?.$1 ?? DateTime.now(),
+      endDateTime: range?.$2 ?? DateTime.now(),
       organizer: fullName.value,
-      bloodGroups: groups,
+      bloodGroups: BloodActivityModel.bloodGroupsFromString(groups),
       description: description,
       quota: quota,
       registered: 0,
@@ -262,7 +263,7 @@ class AppController extends GetxController {
   }
 
   void registerForActivity(
-    BloodActivity activity,
+    BloodActivityModel activity,
     String name,
     String phone,
     String group,

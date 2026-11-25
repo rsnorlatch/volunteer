@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:volunteer/adapter/profile_repository/profile_repository_interface.dart';
 import 'package:volunteer/adapter/session_manager/session_manager_interface.dart';
 import 'package:volunteer/entities/profile.dart';
@@ -31,5 +32,11 @@ class FakeSessionManager implements SessionManagerInterface {
   @override
   Future<Profile?> getCurrentProfileAsync() async {
     return _currentProfile;
+  }
+
+  @override
+  Future<String?> getCurrentUserIdAsync() async {
+    // sins
+    return Uuid().v4();
   }
 }

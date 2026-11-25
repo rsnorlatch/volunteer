@@ -6,6 +6,8 @@ import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_pages.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_mapper.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/data/models/registration.dart';
 import 'package:volunteer/entities/role.dart';
 
@@ -29,7 +31,7 @@ void main() {
     Get.reset();
   });
 
-  BloodActivity activity({
+  BloodActivityModel activity({
     String id = 'activity-1',
     String ownerEmail = 'organizer@example.com',
   }) {
@@ -44,7 +46,7 @@ void main() {
       bloodGroups: 'O+',
       description: '',
       quota: 1,
-    );
+    ).toModel();
   }
 
   test('organizer activities are scoped to the signed-in account', () {

@@ -130,7 +130,7 @@ class DashboardPage extends StatelessWidget {
                       child: ActivityCard(
                         activity: a,
                         meta:
-                            '${Fmt.shortDate(a.date)} • ${a.registered} pendaftar',
+                            '${Fmt.shortOf(a.startDateTime)} • ${a.registered} pendaftar',
                         onTap: () => Get.toNamed(AppRoutes.manageRegistrants,
                             arguments: a.id),
                       ),

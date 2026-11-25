@@ -1,28 +1,43 @@
-import 'package:volunteer/data/models/activity.dart';
+import 'package:get/get.dart';
+import 'package:volunteer/adapter/activity_repository/activity_repository_interface.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 
-class FakeActivityRepository {
-  final List<BloodActivity> _activites = [];
+class FakeActivityRepository implements ActivityRepositoryInterface {
+  final List<BloodActivityModel> _activites = [];
 
-  List<BloodActivity> getAll() {
+  @override
+  Future<List<BloodActivityModel>> getAllAsync() async {
     return _activites;
   }
 
-  Future<void> insertAsync(BloodActivity activity) async {
+  @override
+  Future<void> insertAsync(BloodActivityModel activity) async {
     _activites.add(activity);
   }
 
-  Future<BloodActivity?> getByIdAsync(String activityId) async {
+  Future<void> insertAll(List<BloodActivityModel> activities) async {
+    _activites.addAll(activities);
+  }
+
+  @override
+  Future<BloodActivityModel?> getByIdAsync(String activityId) async {
     return _activites
         .where((activity) => activity.id == activityId)
         .firstOrNull;
   }
 
-  Future<void> updateAsync(BloodActivity newActivity) async {
-    for (int i = 0; i <= _activites.length; i++) {
+  @override
+  Future<void> updateAsync(BloodActivityModel newActivity) async {
+    for (int i = 0; i < _activites.length; i++) {
       if (_activites[i].id == newActivity.id) {
         _activites[i] = newActivity;
         break;
       }
     }
+  }
+
+  @override
+  Future<void> deleteByIdAsync(String activityId) async {
+    _activites.removeWhere((activity) => activity.id == activityId);
   }
 }

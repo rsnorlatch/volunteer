@@ -58,7 +58,7 @@ class ActivityDetailPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                StatusPill(Fmt.badge(a.bloodGroups)),
+                StatusPill(Fmt.badgeBloodTypes(a.bloodGroups)),
                 const SizedBox(height: 14),
                 Text(a.title,
                     style: const TextStyle(
@@ -72,8 +72,9 @@ class ActivityDetailPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 _InfoTile(
                   icon: Icons.access_time,
-                  title: Fmt.longDate(a.date),
-                  subtitle: '${Fmt.timeRange(a.time)} WIB',
+                  title: Fmt.longDateOf(a.startDateTime),
+                  subtitle:
+                      '${Fmt.timeRangeOf(a.startDateTime, a.endDateTime)} WIB',
                 ),
                 const SizedBox(height: 10),
                 _InfoTile(
@@ -85,9 +86,9 @@ class ActivityDetailPage extends StatelessWidget {
                 _InfoTile(
                   icon: Icons.favorite,
                   title: 'Golongan darah',
-                  subtitle: Fmt.acceptsAll(a.bloodGroups)
+                  subtitle: Fmt.acceptsAllBloodTypes(a.bloodGroups)
                       ? 'Semua golongan diterima'
-                      : a.bloodGroups,
+                      : Fmt.bloodTypeLabels(a.bloodGroups).join(', '),
                 ),
                 const SizedBox(height: 10),
                 _InfoTile(

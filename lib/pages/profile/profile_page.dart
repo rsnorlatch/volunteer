@@ -7,7 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
-import 'package:volunteer/data/models/registration.dart';
+import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/entities/role.dart';
 import 'package:volunteer/pages/auth/auth_controller.dart';
 import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
@@ -36,6 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
         await _profile.loadProfilePhoto();
+        await _profile.loadDonorHistory();
       } on PlatformException {
         if (mounted) {
           showAppSnack('Penyimpanan foto tidak dapat diakses.', error: true);
@@ -318,9 +319,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 );
               }
-              final done = act.myRegistrations
-                  .where((r) => r.status == RegistrationStatus.accepted)
-                  .length;
+              final done = profile.applicationCount.value;
               return Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -369,6 +368,117 @@ class _ProfilePageState extends State<ProfilePage> {
               );
             }),
             const SizedBox(height: 20),
+            if (profile.role.value == Role.donor) ...[
+              Obx(() {
+                if (profile.isHistoryLoading.value) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                if (profile.donorHistory.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.history,
+                            size: 48, color: AppColors.textSecondary),
+                        SizedBox(height: 12),
+                        Text('Belum ada riwayat donor',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary)),
+                        SizedBox(height: 6),
+                        Text('Kegiatan donor yang kamu daftarkan akan muncul di sini.',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary),
+                            textAlign: TextAlign.center),
+                      ],
+                    ),
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Riwayat donor',
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary)),
+                    const SizedBox(height: 12),
+                    ...profile.donorHistory.map((entry) {
+                      final a = entry.activity;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: AppCard(
+                          onTap: a == null
+                              ? null
+                              : () => Get.toNamed(AppRoutes.activityDetail,
+                                  arguments: a.id),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 60,
+                                height: 60,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                  child: Icon(Icons.event,
+                                      color: AppColors.primaryColor),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(entry.activityTitle,
+                                        style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.textPrimary)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      entry.activityLocation,
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      entry.activityDate == null
+                                          ? '-'
+                                          : '${Fmt.shortOf(entry.activityDate!)}',
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              StatusPill.registration(entry.registration.status),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                );
+              }),
+              const SizedBox(height: 20),
+            ],
             _MenuItem('Data pribadi', () => Get.toNamed(AppRoutes.editProfile)),
             if (profile.role.value == Role.organizer)
               _MenuItem(

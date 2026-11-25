@@ -3,7 +3,7 @@ import 'package:volunteer/adapter/session_manager/session_manager_interface.dart
 import 'package:volunteer/adapter/user_repository/user_repository_interface.dart';
 import 'package:volunteer/dtos/register_request_dto.dart';
 import 'package:volunteer/entities/profile.dart';
-import 'package:volunteer/entities/user.dart';
+import 'package:volunteer/entities/authentication_user.dart';
 import 'package:volunteer/statuses/login_status.dart';
 import 'package:volunteer/statuses/register_status.dart';
 
@@ -32,8 +32,11 @@ class AuthService {
     if (existingProfile != null) return Registerstatus.usernameTaken;
 
     final insertedUser =
-        User(dto.username.trim(), dto.email.trim(), dto.password);
+        AuthenticationUser(dto.username.trim(), dto.email.trim(), dto.password);
+
     await _user.insertAsync(insertedUser);
+
+    final currentUserId = await _session.getCurrentUserIdAsync();
 
     await _profiles.insertAsync(
       Profile(
@@ -41,7 +44,7 @@ class AuthService {
         dto.email.trim(),
         dto.role,
         bloodType: dto.bloodType,
-      ).withUserId(insertedUser.id),
+      ).withUserId(currentUserId!),
     );
 
     return Registerstatus.success;
