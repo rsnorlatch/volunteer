@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text(
                           'Lupa kata sandi?',
                           style: TextStyle(
-                            color: AppColors.primaryColor,
+                            color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
