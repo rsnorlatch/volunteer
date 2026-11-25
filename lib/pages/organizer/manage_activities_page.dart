@@ -43,7 +43,7 @@ class _ManageActivitiesPageState extends State<ManageActivitiesPage> {
       ),
     );
     if (ok == true) {
-      if (_ctrl.deleteActivity(a.id)) {
+      if (await _ctrl.deleteActivity(a.id)) {
         showAppSnack('Kegiatan dihapus.');
       } else {
         showAppSnack('Kegiatan tidak dapat dihapus.', error: true);

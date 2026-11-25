@@ -4,100 +4,140 @@ import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_mapper.dart';
 import 'package:volunteer/data/models/facility.dart';
+import 'package:volunteer/services/activity_service.dart';
 
 class FacilityController extends GetxController {
   final locationQuery = ''.obs;
   final currentLocation = Rxn<LatLng>();
-  final selectedFacility = Rxn<Facility>();
+  final selectedFacility = Rxn<BloodActivity>();
   final isLocating = false.obs;
   final locationError = RxnString();
 
-  final List<Facility> all = const [
-    Facility(
-      name: 'PMI Kota Bandung',
-      address: 'Jl. Aceh No. 45, Bandung',
-      info: 'Buka hingga 16.00',
-      note: 'Melayani donor O+',
-      distanceKm: 1.2,
-      bloodTypes: ['A+', 'B+', 'O+', 'O-', 'AB+'],
-      latitude: -6.9061,
-      longitude: 107.6093,
-    ),
-    Facility(
-      name: 'RS Harapan Sehat',
-      address: 'Jl. Merdeka No. 12, Bandung',
-      info: 'Layanan donor darah',
-      note: 'Bank darah',
-      distanceKm: 2.4,
-      bloodTypes: ['A+', 'B+', 'O+', 'AB+'],
-      latitude: -6.9230,
-      longitude: 107.6092,
-    ),
-    Facility(
-      name: 'Bank Darah Medika',
-      address: 'Jl. Cendana No. 3, Bandung',
-      info: 'Hubungi lokasi',
-      note: 'Bank darah',
-      distanceKm: 3.1,
-      bloodTypes: ['O+', 'O-', 'B+'],
-      latitude: -6.9181,
-      longitude: 107.6282,
-      isOpen: false,
-    ),
-    Facility(
-      name: 'Klinik Medika',
-      address: 'Jl. Cendana No. 9, Bandung',
-      info: 'Layanan darah',
-      note: 'Layanan darah',
-      distanceKm: 4.0,
-      bloodTypes: ['A+', 'B+', 'AB+'],
-      latitude: -6.9296,
-      longitude: 107.6137,
-    ),
-  ];
+  final activity = Get.find<ActivityService>();
+
+  final List<BloodActivity> all = [];
+
+  @override
+  void onInit() async {
+    super.onInit();
+
+    final activities = await activity.getActivityListAsync();
+
+    all.assignAll(activities.map((activity) => activity.toEntity()).toList());
+  }
 
   /// Daftar di tab Lokasi (urut jarak, bisa dicari).
-  List<Facility> get nearby {
+  List<BloodActivity> get nearby {
     final q = locationQuery.value.trim().toLowerCase();
-    final position = currentLocation.value;
     final list = all
-        .where((f) =>
+        .where((a) =>
             q.isEmpty ||
-            f.name.toLowerCase().contains(q) ||
-            f.address.toLowerCase().contains(q))
-        .map((facility) {
-      if (position == null) return facility;
-      final distance = Geolocator.distanceBetween(
-            position.latitude,
-            position.longitude,
-            facility.latitude,
-            facility.longitude,
-          ) /
-          1000;
-      return facility.copyWith(distanceKm: distance);
-    }).toList();
-    list.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+            a.title.toLowerCase().contains(q) ||
+            a.location.toLowerCase().contains(q))
+        .toList();
+    list.sort((a, b) {
+      final da = _distanceKm(a);
+      final db = _distanceKm(b);
+      // null distances sort to the end
+      if (da == null && db == null) return 0;
+      if (da == null) return 1;
+      if (db == null) return -1;
+      return da.compareTo(db);
+    });
     return list;
   }
 
+  /// Hitung jarak (km) dari lokasi pengguna ke aktivasi. Null jika lokasi
+  /// pengguna atau koordinat aktivasi tidak tersedia.
+  double? _distanceKm(BloodActivity a) {
+    final position = currentLocation.value;
+    if (position == null || a.latitude == null || a.longitude == null) {
+      return null;
+    }
+    return Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          a.latitude!,
+          a.longitude!,
+        ) /
+        1000;
+  }
+
+  /// Jarak (km) untuk ditampilkan di UI.
+  double? distanceKmOf(BloodActivity activity) => _distanceKm(activity);
+
   /// Pencarian lanjutan (halaman Cari fasilitas darah).
-  List<Facility> search(
-      {String name = '', String group = 'Semua', String area = ''}) {
+  List<BloodActivity> search({
+    String name = '',
+    String group = 'Semua',
+    String area = '',
+  }) {
     final n = name.trim().toLowerCase();
     final a = area.trim().toLowerCase();
-    return all.where((f) {
-      final okName = n.isEmpty || f.name.toLowerCase().contains(n);
-      final okGroup = group == 'Semua' || f.bloodTypes.contains(group);
+    return all.where((activity) {
+      final okName = n.isEmpty || activity.title.toLowerCase().contains(n);
+      final okGroup = group == 'Semua' ||
+          activity.bloodGroups.split(',').map((e) => e.trim()).contains(group);
       final okArea = a.isEmpty ||
-          f.address.toLowerCase().contains(a) ||
-          f.name.toLowerCase().contains(a);
+          activity.location.toLowerCase().contains(a) ||
+          activity.title.toLowerCase().contains(a);
       return okName && okGroup && okArea;
     }).toList();
   }
 
-  void selectFacility(Facility facility) {
-    selectedFacility.value = facility;
+  void selectFacility(BloodActivity activity) {
+    selectedFacility.value = activity;
+  }
+
+  // ---------- LocationMap adapter (LocationMap is typed to Facility) ----------
+
+  List<Facility> get mapFacilities {
+    return nearby.map((activity) {
+      final dist = _distanceKm(activity) ?? 0.0;
+      final lat = activity.latitude ?? 0.0;
+      final lng = activity.longitude ?? 0.0;
+      return Facility(
+        name: activity.title,
+        address: activity.location,
+        info: activity.description,
+        note: '',
+        distanceKm: dist,
+        bloodTypes:
+            activity.bloodGroups.split(',').map((e) => e.trim()).toList(),
+        latitude: lat,
+        longitude: lng,
+      );
+    }).toList();
+  }
+
+  Facility? get mapSelectedFacility {
+    final activity = selectedFacility.value;
+    if (activity == null) return null;
+    final lat = activity.latitude ?? 0.0;
+    final lng = activity.longitude ?? 0.0;
+    return Facility(
+      name: activity.title,
+      address: activity.location,
+      info: activity.description,
+      note: '',
+      distanceKm: _distanceKm(activity) ?? 0.0,
+      bloodTypes: activity.bloodGroups.split(',').map((e) => e.trim()).toList(),
+      latitude: lat,
+      longitude: lng,
+    );
+  }
+
+  void onMapFacilitySelected(Facility facility) {
+    final activity = all.firstWhere(
+      (a) => a.title == facility.name,
+      orElse: () => all.isNotEmpty
+          ? all.first
+          : throw StateError('No activities available'),
+    );
+    selectFacility(activity);
   }
 
   Future<void> locateMe() async {

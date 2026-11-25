@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:volunteer/controllers/facility_controller.dart';
-import 'package:volunteer/data/models/facility.dart';
+import 'package:volunteer/data/models/activity.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
 import 'package:volunteer/shared/widgets/primary_button.dart';
@@ -22,7 +22,7 @@ class _FacilitySearchPageState extends State<FacilitySearchPage> {
   final _name = TextEditingController();
   final _area = TextEditingController();
   String _group = 'Semua';
-  late List<Facility> _results = _ctrl.search();
+  late List<BloodActivity> _results = _ctrl.search();
 
   @override
   void dispose() {
@@ -41,10 +41,10 @@ class _FacilitySearchPageState extends State<FacilitySearchPage> {
   @override
   Widget build(BuildContext context) {
     return SubPageScaffold(
-      title: 'Cari fasilitas darah',
-      subtitle: 'Temukan fasilitas berdasarkan nama dan golongan darah.',
+      title: 'Cari kegiatan donor',
+      subtitle: 'Temukan kegiatan berdasarkan nama dan golongan darah.',
       children: [
-        AppSearchField(hint: 'Nama fasilitas / instansi', controller: _name),
+        AppSearchField(hint: 'Nama kegiatan / instansi', controller: _name),
         const SizedBox(height: 18),
         const Text('Golongan darah',
             style: TextStyle(
@@ -89,7 +89,7 @@ class _FacilitySearchPageState extends State<FacilitySearchPage> {
         if (_results.isEmpty)
           const EmptyState(
             icon: Icons.search_off_rounded,
-            title: 'Fasilitas tidak ditemukan',
+            title: 'Kegiatan tidak ditemukan',
             message: 'Coba ubah filter pencarian.',
           )
         else
@@ -103,13 +103,14 @@ class _FacilitySearchPageState extends State<FacilitySearchPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(f.name,
+                          Text(f.title,
                               style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary)),
                           const SizedBox(height: 6),
-                          Text('${f.address.split(',').first} • ${f.note}',
+                          Text(
+                              '${f.location.split(',').first} • ${f.description}',
                               style: const TextStyle(
                                   fontSize: 11,
                                   color: AppColors.textSecondary)),
@@ -118,8 +119,12 @@ class _FacilitySearchPageState extends State<FacilitySearchPage> {
                     ),
                     const SizedBox(width: 8),
                     StatusPill(
-                      f.isOpen ? 'Buka' : 'Tutup',
-                      tone: f.isOpen ? PillTone.success : PillTone.danger,
+                      f.latitude != null && f.longitude != null
+                          ? 'Tersedia'
+                          : 'Tidak tersedia',
+                      tone: f.latitude != null && f.longitude != null
+                          ? PillTone.success
+                          : PillTone.danger,
                     ),
                   ],
                 ),

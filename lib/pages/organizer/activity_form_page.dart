@@ -198,7 +198,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
     return LatLng(latitude, longitude);
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final formOk = _formKey.currentState!.validate();
 
     String? dateErr;
@@ -247,7 +247,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         quota: existing.quota,
         registered: existing.registered,
       );
-      final updated = _ctrl.updateActivity(activity.toModel());
+      final updated = await _ctrl.updateActivity(activity.toModel());
       if (!updated) {
         showAppSnack('Kegiatan tidak dapat diperbarui.', error: true);
         return;
@@ -268,7 +268,7 @@ class _ActivityFormPageState extends State<ActivityFormPage> {
         description: '',
         quota: quota,
       );
-      final created = _ctrl.addActivity(activity.toModel());
+      final created = await _ctrl.addActivity(activity.toModel());
       if (!created) {
         showAppSnack('Hanya penyelenggara yang dapat membuat kegiatan.',
             error: true);

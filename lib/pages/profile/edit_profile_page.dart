@@ -38,7 +38,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_blood.isEmpty) {
       showAppSnack('Pilih golongan darah kamu.', error: true);
@@ -50,8 +50,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       bloodType: _blood,
       notes: _notes.text.trim(),
     );
-    Get.back();
-    showAppSnack('Profil berhasil diperbarui.');
+    try {
+      await _profile.saveProfile();
+      if (!mounted) return;
+      Get.back();
+      showAppSnack('Profil berhasil diperbarui.');
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnack('Gagal memperbarui profil: $e', error: true);
+    }
   }
 
   @override

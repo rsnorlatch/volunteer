@@ -30,8 +30,8 @@ class _RegistrantsPageState extends State<RegistrantsPage> {
   RegistrationStatus? _filter; // null = semua
 
   void _showDetail(Registration r) {
-    void updateStatus(RegistrationStatus status) {
-      final updated = _ctrl.setRegistrantStatus(r.id, status);
+    void updateStatus(RegistrationStatus status) async {
+      final updated = await _ctrl.setRegistrantStatus(r.id, status);
       Get.back();
       if (updated) {
         showAppSnack('Status pendaftaran diperbarui.');

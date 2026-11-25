@@ -45,7 +45,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     final a = _activity;
     if (a == null) return;
     if (!_formKey.currentState!.validate()) return;
@@ -58,12 +58,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
           error: true);
       return;
     }
-    final reg = _ctrl.register(
+    final reg = await _ctrl.register(
       a,
       name: _name.text.trim(),
       phone: _phone.text.trim(),
       bloodType: _blood,
     );
+    if (reg == null) {
+      showAppSnack('Pendaftaran gagal, coba lagi.', error: true);
+      return;
+    }
     Get.offNamed(AppRoutes.registrationStatus, arguments: reg.id);
   }
 
