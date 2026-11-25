@@ -10,6 +10,14 @@ class FakeProfileRepository implements ProfileRepositoryInterface {
   }
 
   @override
+  Future<void> updateAsync(Profile profile) async {
+    final index = profiles.indexWhere((p) => p.id == profile.id);
+    if (index >= 0) {
+      profiles[index] = profile;
+    }
+  }
+
+  @override
   Future<List<Profile>> getAllAsync() async => List.unmodifiable(profiles);
 
   @override

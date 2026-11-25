@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:volunteer/core/utils/formatters.dart';
-import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
 
@@ -14,7 +14,7 @@ class ActivityCard extends StatelessWidget {
     this.badge,
   });
 
-  final BloodActivity activity;
+  final BloodActivityModel activity;
   final VoidCallback onTap;
   final String? meta;
   final Widget? badge;

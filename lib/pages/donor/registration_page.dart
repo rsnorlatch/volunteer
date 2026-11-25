@@ -6,7 +6,7 @@ import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/routes/app_routes.dart';
 import 'package:volunteer/core/utils/formatters.dart';
 import 'package:volunteer/core/utils/validators.dart';
-import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
 import 'package:volunteer/shared/widgets/app_snackbar.dart';
 import 'package:volunteer/shared/widgets/common_widgets.dart';
@@ -27,7 +27,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _ctrl = Get.find<ActivityController>();
   final _profile = Get.find<ProfileController>();
 
-  late final BloodActivity? _activity = _ctrl.byId(Get.arguments as String);
+  late final BloodActivityModel? _activity =
+      _ctrl.byId(Get.arguments as String);
   late final TextEditingController _name =
       TextEditingController(text: _profile.name.value);
   late final TextEditingController _phone =
@@ -44,7 +45,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit() async {
     final a = _activity;
     if (a == null) return;
     if (!_formKey.currentState!.validate()) return;
@@ -57,12 +58,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
           error: true);
       return;
     }
-    final reg = _ctrl.register(
+    final reg = await _ctrl.register(
       a,
       name: _name.text.trim(),
       phone: _phone.text.trim(),
       bloodType: _blood,
     );
+    if (reg == null) {
+      showAppSnack('Pendaftaran gagal, coba lagi.', error: true);
+      return;
+    }
     Get.offNamed(AppRoutes.registrationStatus, arguments: reg.id);
   }
 

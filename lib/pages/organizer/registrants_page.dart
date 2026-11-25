@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:volunteer/controllers/activity_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/utils/formatters.dart';
+import 'package:volunteer/data/models/activity_mapper.dart';
 import 'package:volunteer/data/models/registration.dart';
 import 'package:volunteer/pages/organizer/organizer_bottom_navigation_bar.dart';
 import 'package:volunteer/shared/constants/app_colors.dart';
@@ -29,8 +30,8 @@ class _RegistrantsPageState extends State<RegistrantsPage> {
   RegistrationStatus? _filter; // null = semua
 
   void _showDetail(Registration r) {
-    void updateStatus(RegistrationStatus status) {
-      final updated = _ctrl.setRegistrantStatus(r.id, status);
+    void updateStatus(RegistrationStatus status) async {
+      final updated = await _ctrl.setRegistrantStatus(r.id, status);
       Get.back();
       if (updated) {
         showAppSnack('Status pendaftaran diperbarui.');
@@ -174,7 +175,7 @@ class _RegistrantsPageState extends State<RegistrantsPage> {
         title: 'Kelola pendaftar',
         subtitle: a == null
             ? 'Pantau pendaftar di semua kegiatanmu.'
-            : '${a.title} • ${Fmt.shortDate(a.date)}',
+            : '${a.title} • ${Fmt.shortDate(a.toEntity().date)}',
         bottomNavigationBar:
             const OrganizerBottomNavigationBar(currentIndex: 2),
         children: [

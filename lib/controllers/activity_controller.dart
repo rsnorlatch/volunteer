@@ -3,25 +3,40 @@ import 'package:get/get.dart';
 import 'package:volunteer/controllers/notification_controller.dart';
 import 'package:volunteer/controllers/profile_controller.dart';
 import 'package:volunteer/core/utils/formatters.dart';
-import 'package:volunteer/data/models/activity.dart';
+import 'package:volunteer/data/models/activity_model.dart';
 import 'package:volunteer/data/models/app_notification.dart';
 import 'package:volunteer/data/models/registration.dart';
 import 'package:volunteer/entities/role.dart';
+import 'package:volunteer/services/activity_service.dart';
 
 enum ActivityFilter { all, nearest, weekend }
 
 class ActivityController extends GetxController {
-  final activities = <BloodActivity>[].obs;
+  final activities = <BloodActivityModel>[].obs;
   final registrations = <Registration>[].obs;
   final query = ''.obs;
   final filter = ActivityFilter.all.obs;
+  final isLoading = false.obs;
 
   ProfileController get _profile => Get.find<ProfileController>();
+  ActivityService get _service => Get.find<ActivityService>();
 
   @override
   void onInit() {
     super.onInit();
-    _seed();
+    load();
+  }
+
+  Future<void> load() async {
+    isLoading.value = true;
+    try {
+      final acts = await _service.getActivityListAsync();
+      activities.assignAll(acts);
+      final regs = await _service.getRegistrationsAsync();
+      registrations.assignAll(regs);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   DateTime _today() {
@@ -31,17 +46,17 @@ class ActivityController extends GetxController {
 
   // ---------- Donor ----------
 
-  bool isActive(BloodActivity a) {
+  bool isActive(BloodActivityModel a) {
     return !a.startDateTime.isBefore(_today());
   }
 
-  List<BloodActivity> get upcomingActivities {
+  List<BloodActivityModel> get upcomingActivities {
     final list = activities.where(isActive).toList();
     list.sort((a, b) => a.startDateTime.compareTo(b.startDateTime));
     return list;
   }
 
-  List<BloodActivity> get visibleActivities {
+  List<BloodActivityModel> get visibleActivities {
     final q = query.value.trim().toLowerCase();
     var list = upcomingActivities;
     if (q.isNotEmpty) {
@@ -56,8 +71,7 @@ class ActivityController extends GetxController {
         break;
       case ActivityFilter.nearest:
         final limit = _today().add(const Duration(days: 7));
-        list =
-            list.where((a) => a.startDateTime.isBefore(limit)).toList();
+        list = list.where((a) => a.startDateTime.isBefore(limit)).toList();
         break;
       case ActivityFilter.weekend:
         list = list.where((a) {
@@ -69,7 +83,7 @@ class ActivityController extends GetxController {
     return list;
   }
 
-  BloodActivity? byId(String id) =>
+  BloodActivityModel? byId(String id) =>
       activities.firstWhereOrNull((a) => a.id == id);
 
   bool isRegistered(String activityId) {
@@ -98,39 +112,37 @@ class ActivityController extends GetxController {
     return next == null ? 'Siap daftar' : Fmt.shortOf(next);
   }
 
-  Registration register(
-    BloodActivity a, {
+  Future<Registration?> register(
+    BloodActivityModel a, {
     required String name,
     required String phone,
     required String bloodType,
-  }) {
-    final reg = Registration(
-      id: 'reg-${DateTime.now().microsecondsSinceEpoch}',
-      activityId: a.id,
-      userKey: _profile.userKey,
-      donorName: name,
-      phone: phone,
-      bloodType: bloodType,
-    );
-    registrations.add(reg);
+  }) async {
+    try {
+      final reg = await _service.applyAsync(
+        activityId: a.id,
+        phoneNumber: phone,
+        donorName: name,
+        bloodType: bloodType,
+      );
 
-    final i = activities.indexWhere((x) => x.id == a.id);
-    if (i >= 0) {
-      activities[i] =
-          activities[i].copyWith(registered: activities[i].registered + 1);
+      Get.find<NotificationController>().add(
+        'Pendaftaran berhasil',
+        'Pendaftaran untuk ${a.title} telah dikirim.',
+        NotificationType.registration,
+      );
+
+      await load();
+      return reg;
+    } catch (e) {
+      print(e);
+      return null;
     }
-
-    Get.find<NotificationController>().add(
-      'Pendaftaran berhasil',
-      'Pendaftaran untuk ${a.title} telah dikirim.',
-      NotificationType.registration,
-    );
-    return reg;
   }
 
   // ---------- Organizer ----------
 
-  List<BloodActivity> activitiesOf(String ownerEmail) => activities
+  List<BloodActivityModel> activitiesOf(String ownerEmail) => activities
       .where((a) => a.ownerEmail.toLowerCase() == ownerEmail.toLowerCase())
       .toList();
 
@@ -151,166 +163,54 @@ class ActivityController extends GetxController {
     return list;
   }
 
-  bool addActivity(BloodActivity a) {
-    final email = _profile.email.value.trim();
-    if (_profile.role.value != Role.organizer ||
-        !_profile.isAuthenticated.value ||
-        email.isEmpty) {
+  Future<bool> addActivity(BloodActivityModel a) async {
+    try {
+      await _service.createActivityAsync(a);
+      await load();
+      return true;
+    } catch (_) {
       return false;
     }
-    activities.insert(0, a.copyWith(ownerEmail: email));
-    return true;
   }
 
-  bool updateActivity(BloodActivity a) {
+  Future<bool> updateActivity(BloodActivityModel a) async {
     if (!canManageActivity(a.id)) return false;
-    final i = activities.indexWhere((x) => x.id == a.id);
-    if (i < 0) return false;
-    activities[i] = a.copyWith(ownerEmail: activities[i].ownerEmail);
-    return true;
+    try {
+      await _service.updateActivityAsync(a);
+      await load();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
-  bool deleteActivity(String id) {
+  Future<bool> deleteActivity(String id) async {
     if (!canManageActivity(id)) return false;
-    activities.removeWhere((a) => a.id == id);
-    registrations.removeWhere((r) => r.activityId == id);
-    return true;
+    try {
+      await _service.deleteActivityAsync(id);
+      await load();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
-  bool setRegistrantStatus(String id, RegistrationStatus status) {
+  Future<bool> setRegistrantStatus(String id, RegistrationStatus status) async {
     final i = registrations.indexWhere((r) => r.id == id);
     if (i < 0 || !canManageActivity(registrations[i].activityId)) return false;
-    final registration = registrations[i];
-    if (registration.status == status) return true;
-
-    final activityIndex =
-        activities.indexWhere((a) => a.id == registration.activityId);
-    final activity = activities[activityIndex];
-    if (status != RegistrationStatus.rejected &&
-        registration.status == RegistrationStatus.rejected &&
-        activity.registered >= activity.quota) {
+    try {
+      switch (status) {
+        case RegistrationStatus.accepted:
+          await _service.acceptRegistrationAsync(id);
+        case RegistrationStatus.rejected:
+          await _service.rejectRegistrationAsync(id);
+        case RegistrationStatus.pending:
+          await _service.markAsPendingAsync(id);
+      }
+      await load();
+      return true;
+    } catch (_) {
       return false;
     }
-
-    if (status == RegistrationStatus.rejected &&
-        registration.status != RegistrationStatus.rejected) {
-      activities[activityIndex] = activity.copyWith(
-        registered: (activity.registered - 1).clamp(0, activity.quota),
-      );
-    } else if (status != RegistrationStatus.rejected &&
-        registration.status == RegistrationStatus.rejected) {
-      activities[activityIndex] =
-          activity.copyWith(registered: activity.registered + 1);
-    }
-    registration.status = status;
-    registrations.refresh();
-    return true;
-  }
-
-  // ---------- Data dummy ----------
-
-  void _seed() {
-    final today = _today();
-    int until(int weekday) {
-      final d = (weekday - today.weekday) % 7;
-      return d == 0 ? 7 : d;
-    }
-
-    final saturday = today.add(Duration(days: until(DateTime.saturday)));
-    final sunday = saturday.add(const Duration(days: 1));
-    const org = 'PMI Bandung';
-
-    final act1 = BloodActivity.dateTimeRangeFromString(
-      Fmt.isoDate(saturday),
-      '09:00 - 13:00',
-    );
-    final act2 = BloodActivity.dateTimeRangeFromString(
-      Fmt.isoDate(sunday),
-      '08:00 - 12:00',
-    );
-    final act3 = BloodActivity.dateTimeRangeFromString(
-      Fmt.isoDate(today.add(const Duration(days: 8))),
-      '10:00 - 14:00',
-    );
-    final act4 = BloodActivity.dateTimeRangeFromString(
-      Fmt.isoDate(today.add(const Duration(days: 2))),
-      '09:00 - 12:00',
-    );
-
-    activities.assignAll([
-      BloodActivity(
-        id: 'act-1',
-        title: 'Donor Darah Peduli Sesama',
-        location: 'PMI Kota Bandung, Jl. Aceh No. 45',
-        startDateTime: act1?.$1 ?? DateTime.now(),
-        endDateTime: act1?.$2 ?? DateTime.now(),
-        organizer: org,
-        bloodGroups: BloodActivity.bloodGroupsFromString('O+, O-, A+, B+'),
-        description: '',
-        quota: 100,
-        registered: 4,
-      ),
-      BloodActivity(
-        id: 'act-2',
-        title: 'Berbagi untuk Negeri',
-        location: 'RS Harapan Sehat, Jl. Merdeka No. 12',
-        startDateTime: act2?.$1 ?? DateTime.now(),
-        endDateTime: act2?.$2 ?? DateTime.now(),
-        organizer: org,
-        bloodGroups: BloodActivity.bloodGroupsFromString('A+, A-'),
-        description: '',
-        quota: 80,
-        registered: 2,
-      ),
-      BloodActivity(
-        id: 'act-3',
-        title: 'Sehat Bersama',
-        location: 'Klinik Medika, Jl. Cendana No. 9',
-        startDateTime: act3?.$1 ?? DateTime.now(),
-        endDateTime: act3?.$2 ?? DateTime.now(),
-        organizer: org,
-        bloodGroups: BloodActivity.bloodGroupsFromString('B+, B-'),
-        description: '',
-        quota: 60,
-        registered: 0,
-      ),
-      BloodActivity(
-        id: 'act-4',
-        title: 'Aksi Donor Kampus',
-        location: 'Aula Kampus, Jl. Dipati Ukur',
-        startDateTime: act4?.$1 ?? DateTime.now(),
-        endDateTime: act4?.$2 ?? DateTime.now(),
-        organizer: org,
-        bloodGroups: BloodActivity.bloodGroupsFromString(
-          'A+, A-, B+, B-, O+, O-, AB+, AB-',
-        ),
-        description: '',
-        quota: 150,
-        registered: 1,
-      ),
-    ]);
-
-    Registration r(String id, String act, String name, String blood,
-            RegistrationStatus s, int daysAgo) =>
-        Registration(
-          id: id,
-          activityId: act,
-          userKey: 'seed-$id',
-          donorName: name,
-          phone: '0812345678$id'.replaceAll(RegExp(r'[^0-9]'), ''),
-          bloodType: blood,
-          status: s,
-          createdAt: today.subtract(Duration(days: daysAgo)),
-        );
-
-    registrations.assignAll([
-      r('1', 'act-1', 'Alya Pratama', 'O+', RegistrationStatus.pending, 5),
-      r('2', 'act-1', 'Bima Saputra', 'A+', RegistrationStatus.accepted, 6),
-      r('3', 'act-1', 'Citra Lestari', 'B+', RegistrationStatus.pending, 7),
-      r('4', 'act-1', 'Dian Putra', 'O-', RegistrationStatus.accepted, 8),
-      r('5', 'act-2', 'Eka Wijaya', 'A+', RegistrationStatus.pending, 2),
-      r('6', 'act-2', 'Farah Nabila', 'A-', RegistrationStatus.accepted, 3),
-      r('7', 'act-4', 'Galih Permana', 'O+', RegistrationStatus.pending, 1),
-    ]);
   }
 }

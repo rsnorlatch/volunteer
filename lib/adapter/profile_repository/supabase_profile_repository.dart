@@ -14,7 +14,14 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
     final query = await client.from("profiles").select("*");
 
     return query
-        .map((row) => Profile(row["username"], row["email"], row["role"])
+        .map((row) => Profile(
+              row["fullname"],
+              row["email"],
+              row["role"] == "donor" ? Role.donor : Role.organizer,
+              bloodType: row["bloodtype"] ?? '',
+              phone: row["phone"] ?? '',
+              medicalNotes: row["medical_notes"] ?? '',
+            )
             .withId(row["id"])
             .withUserId(row["user_id"]))
         .toList();
@@ -32,9 +39,14 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
       return null;
     }
 
-    return Profile(queried["fullname"], queried["email"], queried["role"])
-        .withId(queried["id"])
-        .withUserId(queried["user_id"]);
+    return Profile(
+      queried["fullname"],
+      queried["email"],
+      queried["role"] == "donor" ? Role.donor : Role.organizer,
+      bloodType: queried["bloodtype"] ?? '',
+      phone: queried["phone"] ?? '',
+      medicalNotes: queried["medical_notes"] ?? '',
+    ).withId(queried["id"]).withUserId(queried["user_id"]);
   }
 
   @override
@@ -42,15 +54,21 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
     final queried = await client
         .from("profiles")
         .select("*")
-        .eq("username", username)
+        .eq("fullname", username)
         .maybeSingle();
 
     if (queried == null) {
       return null;
     }
 
-    return Profile(queried["fullname"], queried["email"], queried["role"])
-        .withId(queried["id"])
+    return Profile(
+      queried["fullname"],
+      queried["email"],
+      queried["role"] == "donor" ? Role.donor : Role.organizer,
+      bloodType: queried["bloodtype"] ?? '',
+      phone: queried["phone"] ?? '',
+      medicalNotes: queried["medical_notes"] ?? '',
+    ).withId(queried["id"])
         .withUserId(queried["user_id"]);
   }
 
@@ -59,13 +77,31 @@ class SupabaseProfileRepository implements ProfileRepositoryInterface {
     try {
       await client.from("profiles").insert({
         "fullname": profile.username,
-        "username": profile.username,
         "email": profile.email,
-        "role": profile.role.toString(),
+        "role": profile.role == Role.donor ? "donor" : "organizer",
+        "bloodtype": profile.bloodType,
+        "phone": profile.phone,
+        "medical_notes": profile.medicalNotes,
         "user_id": profile.userId,
       });
     } catch (e) {
       throw Exception("failed to insert profile: $e");
+    }
+  }
+
+  @override
+  Future<void> updateAsync(Profile profile) async {
+    try {
+      await client.from("profiles").update({
+        "fullname": profile.username,
+        "email": profile.email,
+        "role": profile.role == Role.donor ? "donor" : "organizer",
+        "bloodtype": profile.bloodType,
+        "phone": profile.phone,
+        "medical_notes": profile.medicalNotes,
+      }).eq("id", profile.id);
+    } catch (e) {
+      throw Exception("failed to update profile: $e");
     }
   }
 }

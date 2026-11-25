@@ -44,16 +44,16 @@ class LocationPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Obx(() => LocationMap(
-                  facilities: ctrl.nearby,
+                  facilities: ctrl.mapFacilities,
                   userLocation: ctrl.currentLocation.value,
-                  selectedFacility: ctrl.selectedFacility.value,
-                  onFacilitySelected: ctrl.selectFacility,
+                  selectedFacility: ctrl.mapSelectedFacility,
+                  onFacilitySelected: ctrl.onMapFacilitySelected,
                   onLocatePressed: ctrl.locateMe,
                   isLocating: ctrl.isLocating.value,
                 )),
             const SizedBox(height: 8),
             const Text(
-              'Titik fasilitas pada peta adalah data contoh dan perlu diverifikasi.',
+              'Titik kegiatan pada peta adalah data contoh dan perlu diverifikasi.',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
             Obx(() {
@@ -74,7 +74,7 @@ class LocationPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Lokasi terdekat',
+                const Text('Kegiatan terdekat',
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
@@ -95,7 +95,7 @@ class LocationPage extends StatelessWidget {
               if (list.isEmpty) {
                 return const EmptyState(
                   icon: Icons.location_off_outlined,
-                  title: 'Lokasi tidak ditemukan',
+                  title: 'Kegiatan tidak ditemukan',
                   message: 'Coba kata kunci lain.',
                 );
               }
@@ -125,17 +125,21 @@ class LocationPage extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(f.name,
+                                    Text(f.title,
                                         style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w800,
                                             color: AppColors.textPrimary)),
                                     const SizedBox(height: 6),
                                     Text(
-                                        '${ctrl.currentLocation.value == null ? 'Jarak belum tersedia' : Fmt.distance(f.distanceKm)} • ${f.info}',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textSecondary)),
+                                      ctrl.currentLocation.value == null ||
+                                              f.latitude == null ||
+                                              f.longitude == null
+                                          ? 'Jarak belum tersedia • ${f.description}'
+                                          : '${Fmt.distance(ctrl.distanceKmOf(f)!)} • ${f.description}',
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary)),
                                   ],
                                 ),
                               ),

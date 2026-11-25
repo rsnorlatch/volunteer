@@ -15,4 +15,10 @@ class SupabaseUserRepository implements UserRepositoryInterface {
       throw Exception("failed to create user: $e");
     }
   }
+
+  @override
+  Future<bool> resetPasswordAsync(String email, String newPassword) {
+    // TODO: implement resetPasswordAsync
+    throw UnimplementedError();
+  }
 }
